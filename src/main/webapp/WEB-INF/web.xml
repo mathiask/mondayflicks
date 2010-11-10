@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app 
+   xmlns="http://java.sun.com/xml/ns/javaee" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   version="2.5">
+  <display-name>sbt-appengine-plugin usage example</display-name>
+
+  <filter>
+    <filter-name>scalatra</filter-name>
+    <filter-class>com.example.FlicksScalatraFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>scalatra</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  <servlet>
+    <servlet-name>helloworld</servlet-name>
+    <servlet-class>com.example.HelloWorld</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>helloworld</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+</web-app>
