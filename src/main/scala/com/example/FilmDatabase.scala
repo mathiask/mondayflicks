@@ -1,22 +1,37 @@
 package com.example
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
+
+import javax.jdo.{JDOHelper, PersistenceManagerFactory, PersistenceManager}
 
 object FilmDatabase {
 
-  private val films = ListBuffer(Film(1, "Zelig"), Film(2, "Manhattan"))
+  private lazy val pmInstance = JDOHelper getPersistenceManagerFactory("transactions-optional")
 
-  def allFilms = films
+  def allFilms: Seq[Film] = 
+    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName).execute.
+                           asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
 
-  def addFilm(title: String) { films += Film(nextId, title) }
-
-  private def nextId = films.size + 1
-
-  def contains(title: String) : Boolean = films.exists(title == _.title)
-
-  def getFilm(id: Int) = films.find(_.id == id).get
-
-  def addComment(id: Int, comment: String) {
-    getFilm(id).addComment(comment)
+  private def withPersistenceManager[T](f: PersistenceManager => T): T = {
+    val pm = pmInstance.getPersistenceManager
+    try {
+      f(pm)
+    } finally {
+      pm.close
+    }
   }
+
+  def addFilm(title: String) { 
+    withPersistenceManager(_.makePersistent(Film(title)))
+  }
+
+  // def contains(title: String) : Boolean = films.exists(title == _.title)
+
+  // def getFilm(id: Int) = films.find(_.id == id).get
+
+  // def addComment(id: Int, comment: String) {
+  //   getFilm(id).addComment(comment)
+  // }
+
 }

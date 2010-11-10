@@ -1,6 +1,6 @@
 import sbt._
 
-class AppengineTestProject(info: ProjectInfo) extends AppengineProject(info) {
+class AppengineTestProject(info: ProjectInfo) extends AppengineProject(info) with DataNucleus {
 
   val scalatraVersion = "2.0.0-SNAPSHOT"
   val scalatra = "org.scalatra" %% "scalatra" % scalatraVersion
