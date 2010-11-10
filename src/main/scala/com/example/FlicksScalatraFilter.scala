@@ -57,7 +57,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     val film = FilmDatabase.getFilm(id)
     Template.page(film.title, 
       <form action={ "/film/" + id } method="POST">
-        <div><a href={ film.imdbLink }>IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
+        <div><a href={ film.imdbLinkOrSearch }>IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
         <div>Comments:</div>
         <div><textarea cols="20" rows="5" name="comments">{ film.comments }</textarea></div>
         <input type="submit" value="Update"/>

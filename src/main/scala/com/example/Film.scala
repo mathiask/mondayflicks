@@ -21,7 +21,9 @@ class Film {
   @Persistent
   private var imdbId: String = _
   
-  def imdbLink: String = if (imdbId == null) "http://www.imdb.com/" else "http://www.imdb.com/title/tt" + imdbId + "/"
+  def imdbLink = if (imdbId == null) "" else imdbLinkForId
+
+  private def imdbLinkForId = "http://www.imdb.com/title/tt" + imdbId + "/"
 
   def imdbLink_=(url: String) {
     val re = ".*?([0-9]+).*?".r
@@ -30,6 +32,8 @@ class Film {
       case _ => null
     }
   }
+
+  def imdbLinkOrSearch  = if (imdbId == null) "http://www.imdb.com/find?s=all&q=" + title else imdbLinkForId
 
   @Persistent
   var comments: String = _
