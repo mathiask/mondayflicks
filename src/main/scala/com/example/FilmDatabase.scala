@@ -5,6 +5,8 @@ import scala.collection.mutable.ListBuffer
 
 import javax.jdo.{JDOHelper, PersistenceManagerFactory, PersistenceManager}
 
+import com.google.appengine.api.datastore.{Key, KeyFactory}
+
 object FilmDatabase {
 
   private lazy val pmInstance = JDOHelper getPersistenceManagerFactory("transactions-optional")
@@ -28,7 +30,18 @@ object FilmDatabase {
 
   // def contains(title: String) : Boolean = films.exists(title == _.title)
 
-  // def getFilm(id: Int) = films.find(_.id == id).get
+  def getFilm(id: String) = withPersistenceManager(_.getObjectById(classOf[Film], filmKey(id)).asInstanceOf[Film])
+
+  private def filmKey(id: String): Key = KeyFactory.createKey(classOf[Film].getSimpleName, id.toLong)
+
+  def updateFilm(id: String, imdbLink: String, comments: String) {
+    withPersistenceManager((pm:PersistenceManager) => {
+      println("Updating film " + id + " to " + imdbLink + " and " + comments)
+      val film = pm.getObjectById(classOf[Film], filmKey(id)).asInstanceOf[Film]
+      film.imdbLink = imdbLink
+      film.comments = comments
+    })
+  }
 
   // def addComment(id: Int, comment: String) {
   //   getFilm(id).addComment(comment)

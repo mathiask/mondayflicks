@@ -38,7 +38,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get(startPage) {
     Template.page("Monday Flicks", 
       <ul>
-        { for (film <- FilmDatabase.allFilms) yield <li>{ film.title }</li> }
+        { for (film <- FilmDatabase.allFilms) yield <li><a href={ "/film/" + film.id }>{ film.title }</a></li> }
       </ul>
       <form action="/film" method="POST">
         <input type="text" name="film"/>
@@ -50,6 +50,24 @@ class FlicksScalatraFilter extends ScalatraFilter {
   post("/film") {
     FilmDatabase.addFilm(params("film"))
     redirect(startPage)
+  }
+
+  get("/film/:id") {
+    val id = params("id")
+    val film = FilmDatabase.getFilm(id)
+    Template.page(film.title, 
+      <form action={ "/film/" + id } method="POST">
+        <div><a href={ film.imdbLink }>IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
+        <div>Comments:</div>
+        <div><textarea cols="20" rows="5" name="comments">{ film.comments }</textarea></div>
+        <input type="submit" value="Update"/>
+      </form>)
+  }
+
+  post("/film/:id") {
+    val id = params("id")
+    FilmDatabase.updateFilm(id, params("imdb"), params("comments"))
+    redirect("/film/" + id)
   }
 
 }
