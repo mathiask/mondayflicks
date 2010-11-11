@@ -10,7 +10,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     def style() =    // """ is scala notation to indicate a string that spans over several lines, including the /n etc
       """
       body { font-family: Trebuchet MS, sans-serif; }
-      h1 { color: #8b2323 }
+      h1 { color: #053B56 }
       """
 
     def page(title:String, content:Seq[Node], message:Option[Any] = None) = {
@@ -38,7 +38,11 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get(startPage) {
     Template.page("Monday Flicks", 
       <ul>
-        { for (film <- FilmDatabase.allFilms) yield <li><a href={ "/film/" + film.id }>{ film.title }</a></li> }
+        { for (film <- FilmDatabase.allFilms) yield <li>
+            <a href={ "/film/" + film.id }>{ film.title }</a> 
+            (<a href={ film.imdbLinkOrSearch } target="_blank">IMDB</a>)
+          </li> 
+        }
       </ul>
       <form action="/film" method="POST">
         <input type="text" name="film"/>
@@ -57,7 +61,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     val film = FilmDatabase.getFilm(id)
     Template.page(film.title, 
       <form action={ "/film/" + id } method="POST">
-        <div><a href={ film.imdbLinkOrSearch }>IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
+        <div><a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
         <div>Comments:</div>
         <div><textarea cols="20" rows="5" name="comments">{ film.comments }</textarea></div>
         <input type="submit" value="Update"/>
