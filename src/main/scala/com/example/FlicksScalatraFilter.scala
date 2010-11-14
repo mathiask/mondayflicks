@@ -75,7 +75,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
           </div>
         }
         <form action={ "/film/" + id + "/comment"} method="POST">
-          <div><textarea cols="20" rows="5" name="comment"/></div>
+          <div><textarea cols="40" rows="5" name="comment"/></div>
           <input type="submit" value="New"/>
         </form>
       </div>)
