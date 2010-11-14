@@ -30,21 +30,23 @@ object FilmDatabase {
 
   // def contains(title: String) : Boolean = films.exists(title == _.title)
 
-  def getFilm(id: String) = withPersistenceManager(_.getObjectById(classOf[Film], filmKey(id)).asInstanceOf[Film])
+  def getFilm(id: String) = withPersistenceManager(pm => {
+    val film = doGetFilm(pm, id)
+    for (c <- film.comments) {}
+    film}
+  )
+
+  private def doGetFilm(pm: PersistenceManager, id: String) = 
+    pm.getObjectById(classOf[Film], filmKey(id)).asInstanceOf[Film]
 
   private def filmKey(id: String): Key = KeyFactory.createKey(classOf[Film].getSimpleName, id.toLong)
 
-  def updateFilm(id: String, imdbLink: String, comments: String) {
-    withPersistenceManager((pm:PersistenceManager) => {
-      println("Updating film " + id + " to " + imdbLink + " and " + comments)
-      val film = pm.getObjectById(classOf[Film], filmKey(id)).asInstanceOf[Film]
-      film.imdbLink = imdbLink
-      film.comments = comments
-    })
+  def updateFilm(id: String, imdbLink: String) {
+    withPersistenceManager(doGetFilm(_, id).imdbLink = imdbLink)
   }
 
-  // def addComment(id: Int, comment: String) {
-  //   getFilm(id).addComment(comment)
-  // }
+  def addCommentToFilm(id: String, comment: String) {
+    withPersistenceManager(doGetFilm(_, id).add(FilmComment("dummy", comment)))
+  }
 
 }

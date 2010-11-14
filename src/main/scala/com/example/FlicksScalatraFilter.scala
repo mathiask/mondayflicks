@@ -9,9 +9,11 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
     def style() =    // """ is scala notation to indicate a string that spans over several lines, including the /n etc
       """
-      body { font-family: Trebuchet MS, sans-serif; }
-      h1 { color: #053B56 }
-      """
+      |body { font-family: Trebuchet MS, sans-serif; }
+      |h1 { color: #053B56 }
+      |div.date { color: gray; font-size=small; font-style=italic; }
+      |div.comment { border: 1px solid gray; width: 40em; }
+      """.stripMargin
 
     def page(title:String, content:Seq[Node], message:Option[Any] = None) = {
       <html>
@@ -59,18 +61,35 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get("/film/:id") {
     val id = params("id")
     val film = FilmDatabase.getFilm(id)
-    Template.page(film.title, 
-      <form action={ "/film/" + id } method="POST">
-        <div><a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
-        <div>Comments:</div>
-        <div><textarea cols="20" rows="5" name="comments">{ film.comments }</textarea></div>
-        <input type="submit" value="Update"/>
-      </form>)
+    Template.page(film.title,
+      <div>
+        <form action={ "/film/" + id } method="POST">
+          <div><a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
+          <input type="submit" value="Update"/>
+        </form>
+        <div>Comments:</div>          
+        { for (comment <- film.comments) yield 
+          <div class="comment">
+            <div class="date">{ comment.created }</div>
+            <div>{ comment.text }</div>
+          </div>
+        }
+        <form action={ "/film/" + id + "/comment"} method="POST">
+          <div><textarea cols="20" rows="5" name="comment"/></div>
+          <input type="submit" value="New"/>
+        </form>
+      </div>)
   }
 
   post("/film/:id") {
     val id = params("id")
-    FilmDatabase.updateFilm(id, params("imdb"), params("comments"))
+    FilmDatabase.updateFilm(id, params("imdb"))
+    redirect("/film/" + id)
+  }
+
+  post("/film/:id/comment") {
+    val id = params("id")
+    FilmDatabase.addCommentToFilm(id, params("comment"))
     redirect("/film/" + id)
   }
 
