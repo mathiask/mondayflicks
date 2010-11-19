@@ -9,8 +9,13 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
     def style() =
       """
-      |body { font-family: Trebuchet MS, sans-serif; }
-      |h1 { color: #053B56 }
+      |body { 
+      |  font-family: Trebuchet MS, sans-serif; 
+      |  padding-left: 100px; padding-right: 100px; padding-top: 50px;
+      |}
+      |h1 { color: #053B56; }
+      |a { color: #404040; }
+      |a:hover { font-weight: bold; }
       |div.date { color: gray; font-size=small; font-style=italic; }
       |div.comment { border: 1px solid gray; width: 40em; }
       """.stripMargin
@@ -44,6 +49,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   get(startPage) {
     Template.page("Monday Flicks", 
+      <h2>Overview</h2>
       <ul>
         { for (film <- FilmDatabase.allFilms) yield <li>
             <a href={ "/film/" + film.id }>{ film.title }</a> 
@@ -52,6 +58,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
         }
       </ul>
       <form action="/film" method="POST">
+        <h2>Create new film entry</h2>
         <input type="text" name="film"/>
         <input type="submit" value="New"/>
       </form>
