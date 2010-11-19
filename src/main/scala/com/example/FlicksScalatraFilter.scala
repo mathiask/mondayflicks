@@ -7,7 +7,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   object Template {
 
-    def style() =    // """ is scala notation to indicate a string that spans over several lines, including the /n etc
+    def style() =
       """
       |body { font-family: Trebuchet MS, sans-serif; }
       |h1 { color: #053B56 }
@@ -15,11 +15,16 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |div.comment { border: 1px solid gray; width: 40em; }
       """.stripMargin
 
-    def page(title:String, content:Seq[Node], message:Option[Any] = None) = {
+    def page(title:String, content:Seq[Node], message:Option[Any] = None, jQuery:Boolean = false) = {
       <html>
         <head>
           <title>{ title }</title>
           <style>{ Template.style }</style>
+          { if (jQuery)
+              <script src="http://www.google.com/jsapi"></script>
+              <script>google.load('jquery', '1.4.4');</script>
+              <script src="/static/jquery.editable.js"></script>
+          }
         </head>
         <body>
           <h1>{ title }</h1>
@@ -61,7 +66,8 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get("/film/:id") {
     val id = params("id")
     val film = FilmDatabase.getFilm(id)
-    Template.page(film.title,
+    Template.page("Film Details",
+      <h2>{ film.title }</h2>
       <div>
         <form action={ "/film/" + id } method="POST">
           <div><a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: <input type="text" name="imdb" value={ film.imdbLink }/></div>
@@ -78,7 +84,19 @@ class FlicksScalatraFilter extends ScalatraFilter {
           <div><textarea cols="40" rows="5" name="comment"/></div>
           <input type="submit" value="New"/>
         </form>
-      </div>)
+        <script>
+          $('h2').editable(function(txt) {{
+            var trimmedText = txt.trim();
+            if (trimmedText !== '') {{
+              $.post('{ "/film/" + id + "/rename" }', {{title: txt}}); 
+              return true;
+            }} else {{
+              return false;
+            }}
+          }});
+        </script>
+      </div>,
+      jQuery = true)
   }
 
   post("/film/:id") {
@@ -93,4 +111,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     redirect("/film/" + id)
   }
 
+  post("/film/:id/rename") {
+    FilmDatabase.renameFilm(params("id"), params("title"))
+  }
 }

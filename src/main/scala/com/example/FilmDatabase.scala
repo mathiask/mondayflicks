@@ -49,4 +49,8 @@ object FilmDatabase {
     withPersistenceManager(doGetFilm(_, id).add(FilmComment("dummy", comment)))
   }
 
+  def renameFilm(id: String, title: String) {
+    withPersistenceManager(doGetFilm(_, id).title = title)
+  }
+
 }

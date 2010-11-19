@@ -13,14 +13,5 @@
     <filter-name>scalatra</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-  
-  <servlet>
-    <servlet-name>helloworld</servlet-name>
-    <servlet-class>com.example.HelloWorld</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>helloworld</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
 
 </web-app>
