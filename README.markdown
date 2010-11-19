@@ -7,5 +7,7 @@ Technology Stack
 ----------------
 * Google AppEngine
 * Scala
+  * using plain JDO
 * Scalatra
+  * currently without Scalate
 * jQuery
