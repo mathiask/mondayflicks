@@ -1,5 +1,6 @@
 $.fn.editable = function(callback){
-  this.click(function() {
+  this.addClass("editable")
+  .click(function() {
     var el = $(this),
         text = el.text();
     el.after("<form action='#'><input type='text' value='" + text + "' size='" + text.length + "'/></form>").hide();
