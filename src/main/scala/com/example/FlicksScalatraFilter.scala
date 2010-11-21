@@ -11,14 +11,30 @@ class FlicksScalatraFilter extends ScalatraFilter {
       """
       |body { 
       |  font-family: Trebuchet MS, sans-serif; 
-      |  padding-left: 100px; padding-right: 100px; padding-top: 50px;
+      |  padding-left: 80px; padding-right: 80px; padding-top: 30px;
+      |  background-color: white;
+      |}
+      |#main {
+      |  background-color: #eeeeee;
+      |  border: 1px solid #003b6b;
+      |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
+      |  padding: 2ex;
       |}
       |h1 { color: #005580; }
       |a { color: #404040; }
       |a:hover, .editable:hover { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
-      |div.date { color: gray; font-size: small; font-style: italic; }
-      |div.comment { padding: 4px; border: 2px solid #005580;; width: 40em; margin-bottom: 2ex; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
+      |div.date { 
+      |  color: gray; 
+      |  font-size: small; 
+      |  font-style: italic; 
+      |}
+      |div.comment { 
+      |  padding: 4px; 
+      |  border: 2px solid #005580; 
+      |  border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; 
+      |  width: 40em; margin-bottom: 2ex; 
+      |}
       """.stripMargin
 
     def page(title:String, content:Seq[Node], message:Option[Any] = None, jQuery:Boolean = false) = {
@@ -33,12 +49,14 @@ class FlicksScalatraFilter extends ScalatraFilter {
           }
         </head>
         <body>
-          <h1>{ title }</h1>
-          { content }
-          <hr/>
-          { message.getOrElse("") }
-          { if (message.isDefined) <hr/> }
-          <a href="/flicks">Overview</a>
+          <div id="main">
+            <h1>{ title }</h1>
+            { content }
+            <hr/>
+            { message.getOrElse("") }
+            { if (message.isDefined) <hr/> }
+            <a href="/flicks">Overview</a>
+          </div>
         </body>
       </html>
     }
