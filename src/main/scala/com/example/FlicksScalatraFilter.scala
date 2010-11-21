@@ -16,8 +16,9 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |h1 { color: #005580; }
       |a { color: #404040; }
       |a:hover, .editable:hover { background-color: #8ECAE8; }
+      |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
       |div.date { color: gray; font-size: small; font-style: italic; }
-      |div.comment { border: 1px solid #005580;; width: 40em; margin-bottom: 2ex; }
+      |div.comment { padding: 4px; border: 2px solid #005580;; width: 40em; margin-bottom: 2ex; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
       """.stripMargin
 
     def page(title:String, content:Seq[Node], message:Option[Any] = None, jQuery:Boolean = false) = {
@@ -75,9 +76,21 @@ class FlicksScalatraFilter extends ScalatraFilter {
     val film = FilmDatabase.getFilm(id)
     Template.page("Film Details",
       <h2><span id="filmTitle">{ film.title }</span></h2>
+      <script>
+        $('#filmTitle').editable(function(txt) {{
+          var trimmedText = txt.trim();
+          if (trimmedText !== '') {{
+            $.post('{ "/film/" + id + "/rename" }', {{title: txt}}); 
+            return true;
+          }} else {{
+            return false;
+          }}
+        }});
+      </script>
       <div>
         <form action={ "/film/" + id } method="POST">
-          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: <input type="text" name="imdb" size="40" value={ film.imdbLink }/>
+          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: 
+          <input type="text" name="imdb" size="40" value={ film.imdbLink }/>
           <input type="submit" value="Update"/>
         </form>
         <h2>Comments</h2>
@@ -91,17 +104,6 @@ class FlicksScalatraFilter extends ScalatraFilter {
           <div><textarea cols="40" rows="5" name="comment"/></div>
           <input type="submit" value="New"/>
         </form>
-        <script>
-          $('#filmTitle').editable(function(txt) {{
-            var trimmedText = txt.trim();
-            if (trimmedText !== '') {{
-              $.post('{ "/film/" + id + "/rename" }', {{title: txt}}); 
-              return true;
-            }} else {{
-              return false;
-            }}
-          }});
-        </script>
       </div>,
       jQuery = true)
   }
