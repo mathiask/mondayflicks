@@ -9,9 +9,11 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
     def style() =
       """
-      |body { 
-      |  font-family: Trebuchet MS, sans-serif; 
-      |  padding-left: 80px; padding-right: 80px; padding-top: 30px;
+      |body {
+      |  font-family: Trebuchet MS, sans-serif;
+      |  padding-left: 30px; padding-right: 30px; padding-top: 30px;
+      |  min-width: 50ex; max-width: 100ex;
+      |  margin-left: auto; margin-right: auto;
       |  background-color: white;
       |}
       |#main {
@@ -24,16 +26,19 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |a { color: #404040; }
       |a:hover, .editable:hover { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
-      |div.date { 
-      |  color: gray; 
-      |  font-size: small; 
-      |  font-style: italic; 
+      |div.date {
+      |  color: gray;
+      |  font-size: small;
+      |  font-style: italic;
       |}
-      |div.comment { 
-      |  padding: 4px; 
-      |  border: 2px solid #005580; 
-      |  border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; 
-      |  width: 40em; margin-bottom: 2ex; 
+      |div.comment {
+      |  padding: 4px;
+      |  border: 2px solid #005580;
+      |  border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
+      |  width: 40em; margin-bottom: 2ex;
+      |}
+      |div.appengine {
+      |  float: right;
       |}
       """.stripMargin
 
@@ -55,6 +60,11 @@ class FlicksScalatraFilter extends ScalatraFilter {
             <hr/>
             { message.getOrElse("") }
             { if (message.isDefined) <hr/> }
+            <div class="appengine">
+              <a href="http://code.google.com/appengine/" target="_blank">
+                <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
+              </a>
+            </div>
             <a href="/flicks">Overview</a>
           </div>
         </body>
@@ -67,13 +77,13 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get("/") { redirect(startPage) }
 
   get(startPage) {
-    Template.page("Monday Flicks", 
+    Template.page("Monday Flicks",
       <h2>Overview</h2>
       <ul>
         { for (film <- FilmDatabase.allFilms) yield <li>
-            <a href={ "/film/" + film.id }>{ film.title }</a> 
+            <a href={ "/film/" + film.id }>{ film.title }</a>
             (<a href={ film.imdbLinkOrSearch } target="_blank">IMDB</a>)
-          </li> 
+          </li>
         }
       </ul>
       <form action="/film" method="POST">
@@ -98,7 +108,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
         $('#filmTitle').editable(function(txt) {{
           var trimmedText = txt.trim();
           if (trimmedText !== '') {{
-            $.post('{ "/film/" + id + "/rename" }', {{title: txt}}); 
+            $.post('{ "/film/" + id + "/rename" }', {{title: txt}});
             return true;
           }} else {{
             return false;
@@ -107,12 +117,12 @@ class FlicksScalatraFilter extends ScalatraFilter {
       </script>
       <div>
         <form action={ "/film/" + id } method="POST">
-          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>: 
+          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>:
           <input type="text" name="imdb" size="40" value={ film.imdbLink }/>
           <input type="submit" value="Update"/>
         </form>
         <h2>Comments</h2>
-        { for (comment <- film.comments) yield 
+        { for (comment <- film.comments) yield
           <div>
             <div class="date">{ comment.created }</div>
             <div class="comment">{ comment.text }</div>
