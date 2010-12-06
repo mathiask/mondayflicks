@@ -65,14 +65,21 @@ class FlicksScalatraFilter extends ScalatraFilter {
                 <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
               </a>
             </div>
-            <a href="/flicks">Overview</a>
+            <a href={startPage}>Overview</a>
+            { if (isLoggedIn) <a href={userService createLogoutURL thisURL}>Log out</a>
+              else <a href={userService createLoginURL thisURL}>Log in</a>
+            }
           </div>
         </body>
       </html>
     }
   }
 
-  private val startPage = "/flicks"
+  private val startPage = "/flicks"    
+  private lazy val userService = com.google.appengine.api.users.UserServiceFactory.getUserService
+
+  private def thisURL = request.getRequestURI
+  private def isLoggedIn = request.getUserPrincipal != null
 
   get("/") { redirect(startPage) }
 
@@ -151,4 +158,9 @@ class FlicksScalatraFilter extends ScalatraFilter {
   post("/film/:id/rename") {
     FilmDatabase.renameFilm(params("id"), params("title"))
   }
+
+  get("/principal") {
+    request.getUserPrincipal + ", admin: " + request.isUserInRole("admin")
+  }
+
 }
