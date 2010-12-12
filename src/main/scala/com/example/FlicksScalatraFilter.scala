@@ -160,7 +160,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
         </form>
         { if (isAdmin) 
             <form action={ "/admin/film/" + id + "/delete" } method="POST">
-              <input type="submit" value="Delete"/>         
+              <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
             </form>
         }
         <div class="user">Added by {film.userNickname} on {film.created}.</div>
