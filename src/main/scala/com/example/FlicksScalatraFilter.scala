@@ -3,6 +3,8 @@ package com.example
 import scala.xml._
 import org.scalatra._
 
+import com.google.appengine.api.users.User
+
 class FlicksScalatraFilter extends ScalatraFilter {
 
   object Template {
@@ -26,7 +28,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |a { color: #404040; }
       |a:hover, .editable:hover { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
-      |div.date {
+      |div.user {
       |  color: gray;
       |  font-size: small;
       |  font-style: italic;
@@ -37,8 +39,9 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |  border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
       |  width: 40em; margin-bottom: 2ex;
       |}
-      |div.appengine {
+      |div.appengine, a.login {
       |  float: right;
+      |  margin-left: 1ex;
       |}
       """.stripMargin
 
@@ -52,6 +55,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
               <script>google.load('jquery', '1.4.4');</script>
               <script src="/static/jquery.editable.js"></script>
           }
+          <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
         </head>
         <body>
           <div id="main">
@@ -66,8 +70,8 @@ class FlicksScalatraFilter extends ScalatraFilter {
               </a>
             </div>
             <a href={startPage}>Overview</a>
-            { if (isLoggedIn) <a href={userService createLogoutURL thisURL}>Log out</a>
-              else <a href={userService createLoginURL thisURL}>Log in</a>
+            { if (isLoggedIn) <a href={userService createLogoutURL thisURL} class="login">Log out</a>
+              else <a href={userService createLoginURL thisURL} class="login">Log in</a>
             }
           </div>
         </body>
@@ -75,11 +79,14 @@ class FlicksScalatraFilter extends ScalatraFilter {
     }
   }
 
-  private val startPage = "/flicks"    
+  private val startPage = "/flicks"
   private lazy val userService = com.google.appengine.api.users.UserServiceFactory.getUserService
 
-  private def thisURL = request.getRequestURI
+  private def currentUser = userService.getCurrentUser
   private def isLoggedIn = request.getUserPrincipal != null
+  private def isAdmin = request.isUserInRole("admin")
+  private def thisURL = request.getRequestURI
+
 
   get("/") { redirect(startPage) }
 
@@ -93,15 +100,25 @@ class FlicksScalatraFilter extends ScalatraFilter {
           </li>
         }
       </ul>
-      <form action="/film" method="POST">
-        <h2>Create new film entry</h2>
-        <input type="text" name="film"/>
-        <input type="submit" value="New"/>
-      </form>
-     )
+      <div>
+      { if (isLoggedIn) 
+          <form action="/user/film" method="POST">
+            <h2>Create new film entry</h2>
+            <input id="film" type="text" name="film"/>
+            <input id="new" type="submit" value="New"/>
+            <script>
+              $(function(){{
+                $('#new').click(function(){{return $('#film').val().trim() !== ''; }});
+              }});
+            </script>
+          </form>
+      }
+      </div>,
+      jQuery = true
+    )
   }
 
-  post("/film") {
+  post("/user/film") {
     FilmDatabase.addFilm(params("film"))
     redirect(startPage)
   }
@@ -112,55 +129,90 @@ class FlicksScalatraFilter extends ScalatraFilter {
     Template.page("Film Details",
       <h2><span id="filmTitle">{ film.title }</span></h2>
       <script>
-        $('#filmTitle').editable(function(txt) {{
+        mondayflicks.renameFile = function(txt) {{
           var trimmedText = txt.trim();
           if (trimmedText !== '') {{
-            $.post('{ "/film/" + id + "/rename" }', {{title: txt}});
+            $.post('{ "/user/film/" + id + "/rename" }', {{title: txt}});
             return true;
           }} else {{
             return false;
           }}
-        }});
+        }};
+        { if (isLoggedIn) "$('#filmTitle').editable(mondayflicks.renameFile);" }
       </script>
       <div>
-        <form action={ "/film/" + id } method="POST">
-          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>:
-          <input type="text" name="imdb" size="40" value={ film.imdbLink }/>
-          <input type="submit" value="Update"/>
+        <form action={ "/user/film/" + id } method="POST">
+          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>
+          { if (isLoggedIn) {
+              <input id="text" type="text" name="imdb" size="40" value={ film.imdbLink }/>
+              <input id="update" type="submit" value="Update"/>
+              <script>
+                $(function(){{
+                  $('#text').hide().data('visible', false);
+                  $('#update').click(function(){{
+                    var text = $('#text');
+                    if (!text.data('visible')) {{ text.show().data('visible', true); return false; }}
+                    else return text.val().trim() !== '';
+                  }});
+                }});
+              </script>
+          }}
         </form>
+        { if (isAdmin) 
+            <form action={ "/admin/film/" + id + "/delete" } method="POST">
+              <input type="submit" value="Delete"/>         
+            </form>
+        }
         <h2>Comments</h2>
         { for (comment <- film.comments) yield
           <div>
-            <div class="date">{ comment.created }</div>
+            <div class="user">{ comment.userNickname }, { comment.created }</div>
             <div class="comment">{ comment.text }</div>
           </div>
         }
-        <form action={ "/film/" + id + "/comment"} method="POST">
-          <div><textarea cols="40" rows="5" name="comment"/></div>
-          <input type="submit" value="New"/>
-        </form>
+        { if (isLoggedIn) {
+          <form action={ "/user/film/" + id + "/comment"} method="POST">
+            <div><textarea cols="40" rows="5" name="comment"/></div>
+            <input type="submit" value="New"/>
+          </form>
+        }}
       </div>,
       jQuery = true)
   }
 
-  post("/film/:id") {
+  post("/user/film/:id") {
     val id = params("id")
     FilmDatabase.updateFilm(id, params("imdb"))
     redirect("/film/" + id)
   }
 
-  post("/film/:id/comment") {
+  post("/user/film/:id/comment") {
     val id = params("id")
-    FilmDatabase.addCommentToFilm(id, params("comment"))
+    FilmDatabase.addCommentToFilm(id, params("comment"), currentUser)
     redirect("/film/" + id)
   }
 
-  post("/film/:id/rename") {
+  post("/user/film/:id/rename") {
     FilmDatabase.renameFilm(params("id"), params("title"))
   }
 
-  get("/principal") {
-    request.getUserPrincipal + ", admin: " + request.isUserInRole("admin")
+  post("/admin/film/:id/delete") {
+    FilmDatabase.deleteFilm(params("id"))
+    redirect(startPage)
+  }
+
+  // --------------------------------------------------------------------------------
+
+  get("/admin/migrate/comments") {
+    "TBD migrate comments"
+  }
+
+  // --------------------------------------------------------------------------------
+
+  get("/user/principal") {
+    val user = currentUser
+    request.getUserPrincipal + ", admin: " + isAdmin +
+    " / " + user.getNickname + "(" + user.getEmail + ")"
   }
 
 }

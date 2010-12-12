@@ -17,10 +17,20 @@
 
   <security-constraint>
     <web-resource-collection>
-      <url-pattern>/principal/*</url-pattern>
+      <web-resource-name>Pages for users who are logged in</web-resource-name>
+      <url-pattern>/user/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Admin pages</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
 

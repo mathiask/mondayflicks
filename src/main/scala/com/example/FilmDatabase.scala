@@ -6,6 +6,8 @@ import scala.collection.mutable.ListBuffer
 import javax.jdo.{JDOHelper, PersistenceManagerFactory, PersistenceManager}
 
 import com.google.appengine.api.datastore.{Key, KeyFactory}
+import com.google.appengine.api.users.User
+
 
 object FilmDatabase {
 
@@ -45,12 +47,16 @@ object FilmDatabase {
     withPersistenceManager(doGetFilm(_, id).imdbLink = imdbLink)
   }
 
-  def addCommentToFilm(id: String, comment: String) {
-    withPersistenceManager(doGetFilm(_, id).add(FilmComment("dummy", comment)))
+  def addCommentToFilm(id: String, comment: String, user: User) {
+    withPersistenceManager(doGetFilm(_, id).add(FilmComment(user, comment)))
   }
 
   def renameFilm(id: String, title: String) {
     withPersistenceManager(doGetFilm(_, id).title = title)
   }
 
+  def deleteFilm(id: String) {
+    withPersistenceManager(pm => pm.deletePersistent(doGetFilm(pm, id)))
+  }
+  
 }

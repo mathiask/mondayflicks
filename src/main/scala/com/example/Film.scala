@@ -8,6 +8,7 @@ import java.util.Date
 import javax.jdo.annotations._
 
 import com.google.appengine.api.datastore.Key
+import com.google.appengine.api.users.User
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
 class Film {
@@ -44,9 +45,6 @@ class Film {
 
   def add(comment: FilmComment) = commentList.add(comment)
 
-  // val comments = ListBuffer.empty[String] 
-  // def addComment(comment: String) { comments += comment }
- 
 }
 
 object Film {
@@ -63,13 +61,15 @@ class FilmComment {
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _
 
-  @Persistent var user: String = _
+  @Persistent var user: User = _
   @Persistent var created: Date = _
   @Persistent var text: String = _
+
+  def userNickname = user.getNickname
 }
 
 object FilmComment {
-  def apply(user: String, text: String) = {
+  def apply(user: User, text: String) = {
     val comment = new FilmComment
     comment.user = user
     comment.created = new Date
