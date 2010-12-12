@@ -26,11 +26,9 @@ object FilmDatabase {
     }
   }
 
-  def addFilm(title: String) { 
-    withPersistenceManager(_.makePersistent(Film(title)))
+  def addFilm(title: String, user: User) { 
+    withPersistenceManager(_.makePersistent(Film(title, user)))
   }
-
-  // def contains(title: String) : Boolean = films.exists(title == _.title)
 
   def getFilm(id: String) = withPersistenceManager(pm => {
     val film = doGetFilm(pm, id)

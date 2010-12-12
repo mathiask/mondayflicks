@@ -119,7 +119,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
   }
 
   post("/user/film") {
-    FilmDatabase.addFilm(params("film"))
+    FilmDatabase.addFilm(params("film"), currentUser)
     redirect(startPage)
   }
 
@@ -163,6 +163,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
               <input type="submit" value="Delete"/>         
             </form>
         }
+        <div class="user">Added by {film.userNickname} on {film.created}.</div>
         <h2>Comments</h2>
         { for (comment <- film.comments) yield
           <div>

@@ -16,17 +16,18 @@ class Film {
   @PrimaryKey 
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _
+  @Persistent var title: String = _
+  @Persistent private var imdbId: String = _
+  @Persistent var user: User = _
+  @Persistent var created: Date = _
+  @Persistent 
+  @Order(extensions = Array(new Extension(vendorName = "datanucleus", key = "list-ordering", value = "created")))
+  private var commentList: java.util.List[FilmComment] = _
 
   def id: Long = key.getId
 
-  @Persistent var title: String = _
-
-  @Persistent private var imdbId: String = _
-  
   def imdbLink = if (imdbId == null) "" else imdbLinkForId
-
   private def imdbLinkForId = "http://www.imdb.com/title/tt" + imdbId + "/"
-
   def imdbLink_=(url: String) {
     val re = ".*?([0-9]+).*?".r
     imdbId = url match {
@@ -34,12 +35,9 @@ class Film {
       case _ => null
     }
   }
-
   def imdbLinkOrSearch  = if (imdbId == null) "http://www.imdb.com/find?s=all&q=" + title else imdbLinkForId
 
-  @Persistent 
-  @Order(extensions = Array(new Extension(vendorName = "datanucleus", key = "list-ordering", value = "created")))
-  private var commentList: java.util.List[FilmComment] = _
+  def userNickname = user.getNickname
 
   def comments: List[FilmComment]  = commentList.toList
 
@@ -47,9 +45,12 @@ class Film {
 
 }
 
+
 object Film {
-  def apply(title: String): Film = {
+  def apply(title: String, user:User): Film = {
     val film = new Film
+    film.user = user
+    film.created = new Date
     film.title = title
     film
   }
