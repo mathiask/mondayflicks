@@ -45,7 +45,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |}
       """.stripMargin
 
-    def page(title:String, content:Seq[Node], message:Option[Any] = None, jQuery:Boolean = false) = {
+    def page(title:String, content:NodeSeq, message:Option[Any] = None, jQuery:Boolean = false) = {
       <html>
         <head>
           <title>{ title }</title>
@@ -91,32 +91,35 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get("/") { redirect(startPage) }
 
   get(startPage) {
-    Template.page("Monday Flicks",
-      <h2>Overview</h2>
-      <ul>
-        { for (film <- FilmDatabase.allFilms) yield <li>
-            <a href={ "/film/" + film.id }>{ film.title }</a>
-            (<a href={ film.imdbLinkOrSearch } target="_blank">IMDB</a>)
-          </li>
-        }
-      </ul>
-      <div>
-      { if (isLoggedIn) 
-          <form action="/user/film" method="POST">
-            <h2>Create new film entry</h2>
-            <input id="film" type="text" name="film"/>
-            <input id="new" type="submit" value="New"/>
-            <script>
-              $(function(){{
-                $('#new').click(function(){{return $('#film').val().trim() !== ''; }});
-              }});
-            </script>
-          </form>
-      }
-      </div>,
-      jQuery = true
-    )
+    Template.page("Monday Flicks", 
+                  Seq(<h2>Overview</h2>,
+                      filmList, 
+                      newFilmForm),
+                  jQuery = true)
   }
+
+  private def filmList = 
+    <ul>
+      { for (film <- FilmDatabase.allFilms) yield <li>
+          <a href={ "/film/" + film.id }>{ film.title }</a>
+          (<a href={ film.imdbLinkOrSearch } target="_blank">IMDB</a>)
+        </li>
+      }
+    </ul>
+
+  private def newFilmForm = 
+    if (isLoggedIn) 
+      <form action="/user/film" method="POST">
+        <h2>Create new film entry</h2>
+        <input id="film" type="text" name="film"/>
+        <input id="new" type="submit" value="New"/>
+        <script>
+          $(function(){{
+            $('#new').click(function(){{return $('#film').val().trim() !== ''; }});
+          }});
+        </script>
+      </form>
+    else <span/>
 
   post("/user/film") {
     FilmDatabase.addFilm(params('film), currentUser)
@@ -126,65 +129,85 @@ class FlicksScalatraFilter extends ScalatraFilter {
   get("/film/:id") {
     val id = params('id)
     val film = FilmDatabase.getFilm(id)
-    Template.page("Film Details",
-      <h2><span id="filmTitle">{ film.title }</span></h2>
-      <script>
-        mondayflicks.renameFile = function(txt) {{
-          var trimmedText = txt.trim();
-          if (trimmedText !== '') {{
-            $.post('{ "/user/film/" + id + "/rename" }', {{title: txt}});
-            return true;
-          }} else {{
-            return false;
-          }}
-        }};
-        { if (isLoggedIn) "$('#filmTitle').editable(mondayflicks.renameFile);" }
-      </script>
-      <div>
-        <form action={ "/user/film/" + id } method="POST">
-          <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>
-          { if (isLoggedIn) {
-              <input id="text" type="text" name="imdb" size="40" value={ film.imdbLink }/>
-              <input id="update" type="submit" value="Update"/>
-              <script>
-                $(function(){{
-                  $('#text').hide().data('visible', false);
-                  $('#update').click(function(){{
-                    var text = $('#text');
-                    if (!text.data('visible')) {{ text.show().data('visible', true); return false; }}
-                    else return text.val().trim() !== '';
-                  }});
-                }});
-              </script>
-          }}
-        </form>
-        { if (isAdmin) 
-            <form action={ "/admin/film/" + id + "/delete" } method="POST">
-              <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
-            </form>
-        }
-        <div class="user">Added by {film.userNickname} on {film.created}.</div>
-        <h2>Comments</h2>
-        { for (comment <- film.comments) yield
-          <div>
-            <div class="user">{ comment.userNickname }, { comment.created }</div>
-            <div class="comment">{ comment.text }</div>
-            { if (isAdmin) 
-                <form action={ "/admin/film/" + id + "/" + comment.keyString + "/delete" } method="POST">
-                  <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
-                </form>
-            }
-          </div>
-        }
-        { if (isLoggedIn) {
-          <form action={ "/user/film/" + id + "/comment"} method="POST">
-            <div><textarea cols="40" rows="5" name="comment"/></div>
-            <input type="submit" value="New"/>
-          </form>
-        }}
-      </div>,
-      jQuery = true)
+    Template.page("Film Details", 
+                  Seq(<h2><span id="filmTitle">{ film.title }</span></h2>,
+                      renameFilmScript(id),
+                      filmTitleAndImdbForm(id, film),
+                      deleteFilmForm(id),
+                      <div class="user">Added by {film.userNickname} on {film.created}.</div>,
+                      <h2>Comments</h2>,
+                      comments(id, film.comments),
+                      addCommentForm(id)),
+                  jQuery = true)
   }
+
+  private def renameFilmScript(id: String) = 
+    <script>
+      mondayflicks.renameFile = function(txt) {{
+        var trimmedText = txt.trim();
+        if (trimmedText !== '') {{
+          $.post('{ "/user/film/" + id + "/rename" }', {{title: txt}});
+          return true;
+        }} else {{
+          return false;
+        }}
+      }};
+      { if (isLoggedIn) "$('#filmTitle').editable(mondayflicks.renameFile);" }
+    </script>
+
+  private def filmTitleAndImdbForm(id: String, film: Film) =
+    <form action={ "/user/film/" + id } method="POST">
+      <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>
+      { imdbForm(film.imdbLink) }
+    </form>
+
+  private def imdbForm(imdbLink: String) = 
+    if (isLoggedIn) Seq(<input id="text" type="text" name="imdb" size="40" value={ imdbLink }/>,
+                        <input id="update" type="submit" value="Update"/>,
+                        showUpdateButtonScript)
+    else Seq()
+
+  private def showUpdateButtonScript =
+    <script>
+      $(function(){{
+        $('#text').hide().data('visible', false);
+        $('#update').click(function(){{
+          var text = $('#text');
+          if (!text.data('visible')) {{ text.show().data('visible', true); return false; }}
+          else return text.val().trim() !== '';
+        }});
+      }});
+    </script>
+
+  private def deleteFilmForm(id: String) =
+    if (isAdmin) 
+      <form action={ "/admin/film/" + id + "/delete" } method="POST">
+        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
+      </form>
+    else <span/>
+
+  private def comments(id: String, comments: Seq[FilmComment]) =
+    <div>
+      { for (comment <- comments) yield
+        <div>
+          <div class="user">{ comment.userNickname }, { comment.created }</div>
+          <div class="comment">{ comment.text }</div>
+          { if (isAdmin) 
+              <form action={ "/admin/film/" + id + "/" + comment.keyString + "/delete" } method="POST">
+                <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
+              </form>
+          }
+        </div>
+      }
+    </div>
+     
+  private def addCommentForm(id: String) =
+    if (isLoggedIn)
+      <form action={ "/user/film/" + id + "/comment"} method="POST">
+        <div><textarea cols="40" rows="5" name="comment"/></div>
+        <input type="submit" value="New"/>
+      </form>
+    else <span/>
 
   post("/user/film/:id") {
     val id = params('id)
