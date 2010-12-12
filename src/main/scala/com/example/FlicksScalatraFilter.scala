@@ -45,16 +45,14 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |}
       """.stripMargin
 
-    def page(title:String, content:NodeSeq, message:Option[Any] = None, jQuery:Boolean = false) = {
+    def page(title:String, content:NodeSeq, message:Option[Any] = None) = {
       <html>
         <head>
           <title>{ title }</title>
           <style>{ Template.style }</style>
-          { if (jQuery)
-              <script src="http://www.google.com/jsapi"></script>
-              <script>google.load('jquery', '1.4.4');</script>
-              <script src="/static/jquery.editable.js"></script>
-          }
+          <script src="http://www.google.com/jsapi"></script>
+          <script>google.load('jquery', '1.4.4');</script>
+          <script src="/static/jquery.editable.js"></script>
           <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
         </head>
         <body>
@@ -94,8 +92,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     Template.page("Monday Flicks", 
                   Seq(<h2>Overview</h2>,
                       filmList, 
-                      newFilmForm),
-                  jQuery = true)
+                      newFilmForm))
   }
 
   private def filmList = 
@@ -113,13 +110,17 @@ class FlicksScalatraFilter extends ScalatraFilter {
         <h2>Create new film entry</h2>
         <input id="film" type="text" name="film"/>
         <input id="new" type="submit" value="New"/>
-        <script>
-          $(function(){{
-            $('#new').click(function(){{return $('#film').val().trim() !== ''; }});
-          }});
-        </script>
+        { onClickNonBlankScript("#new", "#film") }
       </form>
     else <span/>
+
+  /** Add an onclick handler to a control cheking that an input widget is non blank. */
+  private def onClickNonBlankScript(controlSelector:String , inputSelector: String) =
+    <script>
+      $(function(){{
+        $('{controlSelector}').click(function(){{return $('{inputSelector}').val().trim() !== ''; }});
+      }});
+    </script>
 
   post("/user/film") {
     FilmDatabase.addFilm(params('film), currentUser)
@@ -137,8 +138,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
                       <div class="user">Added by {film.userNickname} on {film.created}.</div>,
                       <h2>Comments</h2>,
                       comments(id, film.comments),
-                      addCommentForm(id)),
-                  jQuery = true)
+                      addCommentForm(id)))
   }
 
   private def renameFilmScript(id: String) = 
@@ -192,20 +192,24 @@ class FlicksScalatraFilter extends ScalatraFilter {
         <div>
           <div class="user">{ comment.userNickname }, { comment.created }</div>
           <div class="comment">{ comment.text }</div>
-          { if (isAdmin) 
-              <form action={ "/admin/film/" + id + "/" + comment.keyString + "/delete" } method="POST">
-                <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
-              </form>
-          }
+          { deleteCommentForm(id, comment.keyString, comment.user) }
         </div>
       }
     </div>
      
+  private def deleteCommentForm(id: String, keyString: String, user: User) =
+    if (isAdmin || currentUser == user) 
+      <form action={ "/user/film/" + id + "/" + keyString + "/delete" } method="POST">
+        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
+      </form>
+    else <span/>
+
   private def addCommentForm(id: String) =
     if (isLoggedIn)
       <form action={ "/user/film/" + id + "/comment"} method="POST">
-        <div><textarea cols="40" rows="5" name="comment"/></div>
-        <input type="submit" value="New"/>
+        <div><textarea id="comment" cols="40" rows="5" name="comment"/></div>
+        <input id="new" type="submit" value="New"/>
+        { onClickNonBlankScript("#new", "#comment") }
       </form>
     else <span/>
 
@@ -230,8 +234,8 @@ class FlicksScalatraFilter extends ScalatraFilter {
     redirect(startPage)
   }
 
-  post("/admin/film/:id/:key/delete") {
-    FilmDatabase.deleteComment(params('key))
+  post("/user/film/:id/:key/delete") {
+    FilmDatabase.deleteComment(params('key), currentUser, isAdmin)
     redirect("/film/" + params('id))
   }
 

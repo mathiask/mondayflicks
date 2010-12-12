@@ -57,8 +57,11 @@ object FilmDatabase {
     withPersistenceManager(pm => pm.deletePersistent(doGetFilm(pm, id)))
   }
 
-  def deleteComment(keyString: String) {
-    withPersistenceManager(pm => pm.deletePersistent(
-      pm.getObjectById(classOf[FilmComment], KeyFactory.stringToKey(keyString))))
+  def deleteComment(keyString: String, user: User, admin: Boolean) {
+    withPersistenceManager(pm => { 
+      val comment = pm.getObjectById(classOf[FilmComment], KeyFactory.stringToKey(keyString)).asInstanceOf[FilmComment]
+      if (admin || user == comment.user)
+        pm.deletePersistent(comment)
+    })
   }
 }
