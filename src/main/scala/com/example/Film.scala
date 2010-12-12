@@ -7,7 +7,7 @@ import java.util.Date
 
 import javax.jdo.annotations._
 
-import com.google.appengine.api.datastore.Key
+import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
@@ -67,6 +67,7 @@ class FilmComment {
   @Persistent var text: String = _
 
   def userNickname = user.getNickname
+  def keyString = KeyFactory.keyToString(key)
 }
 
 object FilmComment {

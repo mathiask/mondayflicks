@@ -119,12 +119,12 @@ class FlicksScalatraFilter extends ScalatraFilter {
   }
 
   post("/user/film") {
-    FilmDatabase.addFilm(params("film"), currentUser)
+    FilmDatabase.addFilm(params('film), currentUser)
     redirect(startPage)
   }
 
   get("/film/:id") {
-    val id = params("id")
+    val id = params('id)
     val film = FilmDatabase.getFilm(id)
     Template.page("Film Details",
       <h2><span id="filmTitle">{ film.title }</span></h2>
@@ -169,6 +169,11 @@ class FlicksScalatraFilter extends ScalatraFilter {
           <div>
             <div class="user">{ comment.userNickname }, { comment.created }</div>
             <div class="comment">{ comment.text }</div>
+            { if (isAdmin) 
+                <form action={ "/admin/film/" + id + "/" + comment.keyString + "/delete" } method="POST">
+                  <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
+                </form>
+            }
           </div>
         }
         { if (isLoggedIn) {
@@ -182,24 +187,29 @@ class FlicksScalatraFilter extends ScalatraFilter {
   }
 
   post("/user/film/:id") {
-    val id = params("id")
+    val id = params('id)
     FilmDatabase.updateFilm(id, params("imdb"))
     redirect("/film/" + id)
   }
 
   post("/user/film/:id/comment") {
-    val id = params("id")
+    val id = params('id)
     FilmDatabase.addCommentToFilm(id, params("comment"), currentUser)
     redirect("/film/" + id)
   }
 
   post("/user/film/:id/rename") {
-    FilmDatabase.renameFilm(params("id"), params("title"))
+    FilmDatabase.renameFilm(params('id), params('title))
   }
 
   post("/admin/film/:id/delete") {
-    FilmDatabase.deleteFilm(params("id"))
+    FilmDatabase.deleteFilm(params('id))
     redirect(startPage)
+  }
+
+  post("/admin/film/:id/:key/delete") {
+    FilmDatabase.deleteComment(params('key))
+    redirect("/film/" + params('id))
   }
 
   // --------------------------------------------------------------------------------

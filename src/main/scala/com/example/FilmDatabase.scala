@@ -57,4 +57,8 @@ object FilmDatabase {
     withPersistenceManager(pm => pm.deletePersistent(doGetFilm(pm, id)))
   }
 
+  def deleteComment(keyString: String) {
+    withPersistenceManager(pm => pm.deletePersistent(
+      pm.getObjectById(classOf[FilmComment], KeyFactory.stringToKey(keyString))))
+  }
 }
