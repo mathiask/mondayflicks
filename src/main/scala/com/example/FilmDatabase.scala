@@ -13,7 +13,7 @@ object FilmDatabase {
 
   private lazy val pmInstance = JDOHelper getPersistenceManagerFactory("transactions-optional")
 
-  def allFilms: Seq[Film] = 
+  def allFilms: Seq[Film] =
     withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName).execute.
                            asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
 
@@ -26,7 +26,7 @@ object FilmDatabase {
     }
   }
 
-  def addFilm(title: String, user: User) { 
+  def addFilm(title: String, user: User) {
     withPersistenceManager(_.makePersistent(Film(title, user)))
   }
 
@@ -36,7 +36,7 @@ object FilmDatabase {
     film}
   )
 
-  private def doGetFilm(pm: PersistenceManager, id: String) = 
+  private def doGetFilm(pm: PersistenceManager, id: String) =
     pm.getObjectById(classOf[Film], filmKey(id)).asInstanceOf[Film]
 
   private def filmKey(id: String): Key = KeyFactory.createKey(classOf[Film].getSimpleName, id.toLong)
@@ -57,11 +57,4 @@ object FilmDatabase {
     withPersistenceManager(pm => pm.deletePersistent(doGetFilm(pm, id)))
   }
 
-  def migrateFilm(id: String, user: User) {
-    withPersistenceManager(pm => {
-      val f = doGetFilm(pm, id)
-      f.user = user
-      f.created = new java.util.Date
-    })
-  }
 }

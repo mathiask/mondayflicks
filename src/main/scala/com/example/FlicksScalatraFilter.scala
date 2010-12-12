@@ -204,10 +204,10 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   // --------------------------------------------------------------------------------
 
-  get("/admin/migrate") {
-    for (film <- FilmDatabase.allFilms) FilmDatabase.migrateFilm(film.id.toString, currentUser)
-    redirect(startPage)
-  }
+//   get("/admin/migrate") {
+//     for (film <- FilmDatabase.allFilms) FilmDatabase.migrateFilm(film.id.toString, currentUser)
+//     redirect(startPage)
+//   }
 
   // --------------------------------------------------------------------------------
 
