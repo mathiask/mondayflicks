@@ -56,5 +56,12 @@ object FilmDatabase {
   def deleteFilm(id: String) {
     withPersistenceManager(pm => pm.deletePersistent(doGetFilm(pm, id)))
   }
-  
+
+  def migrateFilm(id: String, user: User) {
+    withPersistenceManager(pm => {
+      val f = doGetFilm(pm, id)
+      f.user = user
+      f.created = new java.util.Date
+    })
+  }
 }

@@ -204,8 +204,9 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   // --------------------------------------------------------------------------------
 
-  get("/admin/migrate/comments") {
-    "TBD migrate comments"
+  get("/admin/migrate") {
+    for (film <- FilmDatabase.allFilms) FilmDatabase.migrateFilm(film.id.toString, currentUser)
+    redirect(startPage)
   }
 
   // --------------------------------------------------------------------------------
