@@ -45,14 +45,16 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |}
       """.stripMargin
 
-    def page(title:String, content:NodeSeq, message:Option[Any] = None) = {
+    def page(title:String, content:NodeSeq, message:Option[Any] = None, scripts:List[String] = Nil) = {
       <html>
         <head>
           <title>{ title }</title>
           <style>{ Template.style }</style>
+          <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
           <script src="http://www.google.com/jsapi"></script>
           <script>google.load('jquery', '1.4.4');</script>
           <script src="/static/jquery.editable.js"></script>
+          { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
           <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
         </head>
         <body>
@@ -135,10 +137,12 @@ class FlicksScalatraFilter extends ScalatraFilter {
                       renameFilmScript(id),
                       filmTitleAndImdbForm(id, film),
                       deleteFilmForm(id),
+                      scheduleFilmForm(id),
                       <div class="user">Added by {film.userNickname} on {film.created}.</div>,
                       <h2>Comments</h2>,
                       comments(id, film.comments),
-                      addCommentForm(id)))
+                      addCommentForm(id)),
+                  scripts = List("jquery-ui-1.8.7.custom.min.js"))
   }
 
   private def renameFilmScript(id: String) = 
@@ -185,6 +189,15 @@ class FlicksScalatraFilter extends ScalatraFilter {
         <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
       </form>
     else <span/>
+
+  private def scheduleFilmForm(id: String) = 
+    <div>Scheduled for 
+      <input id="scheduledFor" type="text" name="scheduledFor"/>
+      <script>
+        $(function(){{ $('#scheduledFor').datepicker(); }});
+      </script>
+    </div>
+  
 
   private def comments(id: String, comments: Seq[FilmComment]) =
     <div>

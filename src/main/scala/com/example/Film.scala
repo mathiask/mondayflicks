@@ -20,6 +20,7 @@ class Film {
   @Persistent private var imdbId: String = _
   @Persistent var user: User = _
   @Persistent var created: Date = _
+  @Persistent var scheduledFor: Date = _
   @Persistent 
   @Order(extensions = Array(new Extension(vendorName = "datanucleus", key = "list-ordering", value = "created")))
   private var commentList: java.util.List[FilmComment] = _
@@ -40,8 +41,9 @@ class Film {
   def userNickname = user.getNickname
 
   def comments: List[FilmComment]  = commentList.toList
-
   def add(comment: FilmComment) = commentList.add(comment)
+
+  def isScheduled = scheduledFor != null
 
 }
 
@@ -55,6 +57,7 @@ object Film {
     film
   }
 }
+
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
 class FilmComment {
