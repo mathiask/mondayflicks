@@ -12,3 +12,11 @@ Technology Stack
 * Scalatra
   * currently without Scalate
 * jQuery
+
+TODOs
+-----
+* Schedule films
+  * show old, scheduled, unscheduled films
+  * link to Google calendar
+* Links to film lists
+* Atom feeds
