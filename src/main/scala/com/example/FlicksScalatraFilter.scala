@@ -191,14 +191,14 @@ class FlicksScalatraFilter extends ScalatraFilter {
     else <span/>
 
   private def scheduleFilmForm(id: String) = 
-    <div>Scheduled for 
+    <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for 
       <input id="scheduledFor" type="text" name="scheduledFor"/>
+      <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$/);"/>
       <script>
         $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
       </script>
-    </div>
+    </form>
   
-
   private def comments(id: String, comments: Seq[FilmComment]) =
     <div>
       { for (comment <- comments) yield
