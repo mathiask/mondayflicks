@@ -194,7 +194,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     <div>Scheduled for 
       <input id="scheduledFor" type="text" name="scheduledFor"/>
       <script>
-        $(function(){{ $('#scheduledFor').datepicker(); }});
+        $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
       </script>
     </div>
   
