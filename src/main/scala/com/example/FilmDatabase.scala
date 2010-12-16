@@ -5,6 +5,8 @@ import scala.collection.mutable.ListBuffer
 
 import javax.jdo.{JDOHelper, PersistenceManagerFactory, PersistenceManager}
 
+import java.util.Date
+
 import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
 
@@ -63,5 +65,9 @@ object FilmDatabase {
       if (admin || user == comment.user)
         pm.deletePersistent(comment)
     })
+  }
+
+  def schedule(id: String, date: Date) {
+    withPersistenceManager(doGetFilm(_, id).scheduledFor = date)
   }
 }

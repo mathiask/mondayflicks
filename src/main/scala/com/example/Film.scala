@@ -44,6 +44,7 @@ class Film {
   def add(comment: FilmComment) = commentList.add(comment)
 
   def isScheduled = scheduledFor != null
+  def scheduledOption = Option(scheduledFor)
 
 }
 

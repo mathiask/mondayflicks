@@ -1,5 +1,8 @@
 package com.example
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import scala.xml._
 import org.scalatra._
 
@@ -81,6 +84,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   private val startPage = "/flicks"
   private lazy val userService = com.google.appengine.api.users.UserServiceFactory.getUserService
+  private def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
   private def currentUser = userService.getCurrentUser
   private def isLoggedIn = request.getUserPrincipal != null
@@ -100,8 +104,9 @@ class FlicksScalatraFilter extends ScalatraFilter {
   private def filmList = 
     <ul>
       { for (film <- FilmDatabase.allFilms) yield <li>
-          <a href={ "/film/" + film.id }>{ film.title }</a>
+          <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
           (<a href={ film.imdbLinkOrSearch } target="_blank">IMDB</a>)
+          { if (film.isScheduled) <span>: scheduled for <b>{ dateFormat.format(film.scheduledFor) }</b></span> }
         </li>
       }
     </ul>
@@ -120,7 +125,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
   private def onClickNonBlankScript(controlSelector:String , inputSelector: String) =
     <script>
       $(function(){{
-        $('{controlSelector}').click(function(){{return $('{inputSelector}').val().trim() !== ''; }});
+        $('{controlSelector}').click(function(){{return $.trim($('{inputSelector}').val()) !== ''; }});
       }});
     </script>
 
@@ -137,7 +142,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
                       renameFilmScript(id),
                       filmTitleAndImdbForm(id, film),
                       deleteFilmForm(id),
-                      scheduleFilmForm(id),
+                      scheduleFilmForm(id, film.scheduledOption),
                       <div class="user">Added by {film.userNickname} on {film.created}.</div>,
                       <h2>Comments</h2>,
                       comments(id, film.comments),
@@ -148,7 +153,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
   private def renameFilmScript(id: String) = 
     <script>
       mondayflicks.renameFile = function(txt) {{
-        var trimmedText = txt.trim();
+        var trimmedText = $.trim(txt);
         if (trimmedText !== '') {{
           $.post('{ "/user/film/" + id + "/rename" }', {{title: txt}});
           return true;
@@ -178,7 +183,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
         $('#update').click(function(){{
           var text = $('#text');
           if (!text.data('visible')) {{ text.show().data('visible', true); return false; }}
-          else return text.val().trim() !== '';
+          else return $.trim(text.val()) !== '';
         }});
       }});
     </script>
@@ -190,14 +195,23 @@ class FlicksScalatraFilter extends ScalatraFilter {
       </form>
     else <span/>
 
-  private def scheduleFilmForm(id: String) = 
-    <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for 
-      <input id="scheduledFor" type="text" name="scheduledFor"/>
-      <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$/);"/>
-      <script>
-        $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
-      </script>
-    </form>
+  private def scheduleFilmForm(id: String, scheduled: Option[Date]) = 
+    if (scheduled.isDefined || isAdmin) {
+      val dateString = scheduled.flatMap(o => Some(dateFormat format o)).getOrElse("")
+      <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for 
+        { if (isAdmin) {
+            <input id="scheduledFor" type="text" name="scheduledFor" value={ dateString }/>
+            <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$/);"/>
+            <script>
+              $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
+            </script>
+          } else {
+            <span>{ dateString }</span>
+          }
+        }
+      </form>
+    } else <div><em>As yet unscheduled.</em></div>
+    
   
   private def comments(id: String, comments: Seq[FilmComment]) =
     <div>
@@ -221,7 +235,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     if (isLoggedIn)
       <form action={ "/user/film/" + id + "/comment"} method="POST">
         <div><textarea id="comment" cols="40" rows="5" name="comment"/></div>
-        <input id="new" type="submit" value="New"/>
+        <input id="new" type="submit" value="Add comment"/>
         { onClickNonBlankScript("#new", "#comment") }
       </form>
     else <span/>
@@ -249,6 +263,11 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   post("/user/film/:id/:key/delete") {
     FilmDatabase.deleteComment(params('key), currentUser, isAdmin)
+    redirect("/film/" + params('id))
+  }
+
+  post("/admin/film/:id/schedule") {
+    FilmDatabase.schedule(params('id), dateFormat.parse(params('scheduledFor)))
     redirect("/film/" + params('id))
   }
 
