@@ -15,7 +15,7 @@ Technology Stack
 
 TODOs
 -----
-* Schedule films
+* Scheduled films
   * show old, scheduled, unscheduled films
   * link to Google calendar
 * Links to film lists
