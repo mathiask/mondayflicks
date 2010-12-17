@@ -37,6 +37,7 @@ class Film {
     }
   }
   def imdbLinkOrSearch  = if (imdbId == null) "http://www.imdb.com/find?s=all&q=" + title else imdbLinkForId
+  def hasImdbLink = imdbId != null
 
   def userNickname = user.getNickname
 

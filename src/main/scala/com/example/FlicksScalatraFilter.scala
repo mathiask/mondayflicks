@@ -105,7 +105,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
     <ul>
       { for (film <- FilmDatabase.allFilms) yield <li>
           <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
-          (<a href={ film.imdbLinkOrSearch } target="_blank">IMDB</a>)
+          { if (film.hasImdbLink) <span>(<a href={ film.imdbLink } target="_blank">IMDB</a>)</span> }
           { if (film.isScheduled) <span>: scheduled for <b>{ dateFormat.format(film.scheduledFor) }</b></span> }
         </li>
       }
