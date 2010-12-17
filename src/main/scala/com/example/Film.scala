@@ -47,6 +47,8 @@ class Film {
   def isScheduled = scheduledFor != null
   def scheduledOption = Option(scheduledFor)
 
+  def isPast = isScheduled && (scheduledFor before (new Date))
+
 }
 
 

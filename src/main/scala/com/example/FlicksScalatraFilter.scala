@@ -29,7 +29,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |}
       |h1 { color: #005580; }
       |a { color: #404040; }
-      |a:hover, .editable:hover { background-color: #8ECAE8; }
+      |a:hover, .editable:hover, .clickable:hover { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
       |div.user {
       |  color: gray;
@@ -96,20 +96,44 @@ class FlicksScalatraFilter extends ScalatraFilter {
 
   get(startPage) {
     Template.page("Monday Flicks", 
-                  Seq(<h2>Overview</h2>,
-                      filmList, 
+                  Seq(filmList(<h2 id="pastFilms" class="clickable">Past Films</h2>, _.isPast), 
+                      pastFilmsScript,
+                      filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}), 
+                      filmList(<h2>Proposed Films</h2>, ! _.isScheduled), 
                       newFilmForm))
   }
 
-  private def filmList = 
-    <ul>
-      { for (film <- FilmDatabase.allFilms) yield <li>
-          <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
-          { if (film.hasImdbLink) <span>(<a href={ film.imdbLink } target="_blank">IMDB</a>)</span> }
-          { if (film.isScheduled) <span>: scheduled for <b>{ dateFormat.format(film.scheduledFor) }</b></span> }
-        </li>
-      }
-    </ul>
+  private def filmList(title: NodeSeq, filmPredicate: Film => Boolean) = {
+    val films = FilmDatabase.allFilms filter filmPredicate
+    if (films.nonEmpty) 
+      <div>
+        { title }
+        <ul>
+          { for (film <- films) yield <li>
+              <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
+              { if (film.hasImdbLink) <span>(<a href={ film.imdbLink } target="_blank">IMDB</a>)</span> }
+              { if (film.isScheduled) <span>: scheduled for <b>{ dateFormat.format(film.scheduledFor) }</b></span> }
+            </li>
+          }
+        </ul>
+      </div>
+    else <!-- no films in category -->
+  }
+
+  private def pastFilmsScript =
+    <script>
+      $(function(){{
+        var h2 = $('#pastFilms'),
+            ul = h2.siblings('ul');
+        ul.hide();
+        h2.data('visible', false).click(function(){{
+          var visible = !h2.data('visible');
+          h2.data('visible', visible);
+          if (visible) ul.slideDown();
+          else ul.slideUp();
+        }});
+      }});
+    </script>
 
   private def newFilmForm = 
     if (isLoggedIn) 
