@@ -3,7 +3,8 @@ package com.example
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-import java.util.Date
+import java.util.{Date, Calendar, GregorianCalendar, TimeZone}
+import Calendar._
 
 import javax.jdo.annotations._
 
@@ -47,8 +48,14 @@ class Film {
   def isScheduled = scheduledFor != null
   def scheduledOption = Option(scheduledFor)
 
-  def isPast = isScheduled && (scheduledFor before (new Date))
+  def isPast = isScheduled && isBeforeToday
 
+  private def isBeforeToday = {
+    val today = new GregorianCalendar
+    val cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"))
+    cal.setTime(scheduledFor)
+    cal.get(YEAR) < today.get(YEAR) || cal.get(DAY_OF_YEAR) < today.get(DAY_OF_YEAR)
+  }
 }
 
 

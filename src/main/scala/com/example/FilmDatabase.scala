@@ -16,8 +16,8 @@ object FilmDatabase {
   private lazy val pmInstance = JDOHelper getPersistenceManagerFactory("transactions-optional")
 
   def allFilms: Seq[Film] =
-    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName).execute.
-                           asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
+    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor, created").
+                           execute.asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
 
   private def withPersistenceManager[T](f: PersistenceManager => T): T = {
     val pm = pmInstance.getPersistenceManager
