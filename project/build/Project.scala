@@ -5,6 +5,8 @@ class AppengineTestProject(info: ProjectInfo) extends AppengineProject(info) wit
   val scalatraVersion = "2.0.0-SNAPSHOT"
   val scalatra = "org.scalatra" %% "scalatra" % scalatraVersion
 
+  val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
+
   val sonatypeNexusSnapshots = "Sonatype Nexus Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 }
