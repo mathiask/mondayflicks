@@ -54,7 +54,8 @@ class Film {
     val today = new GregorianCalendar
     val cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"))
     cal.setTime(scheduledFor)
-    cal.get(YEAR) < today.get(YEAR) || cal.get(DAY_OF_YEAR) < today.get(DAY_OF_YEAR)
+    cal.get(YEAR) < today.get(YEAR) || 
+      cal.get(YEAR) == today.get(YEAR) && cal.get(DAY_OF_YEAR) < today.get(DAY_OF_YEAR)
   }
 }
 
