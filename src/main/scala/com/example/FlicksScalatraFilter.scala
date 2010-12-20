@@ -29,7 +29,7 @@ class FlicksScalatraFilter extends ScalatraFilter {
       |}
       |h1 { color: #005580; }
       |a { color: #404040; }
-      |a:hover, .editable:hover, .clickable:hover { background-color: #8ECAE8; }
+      |a:hover, .editable-highlighted { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
       |div.user {
       |  color: gray;
@@ -72,10 +72,10 @@ class FlicksScalatraFilter extends ScalatraFilter {
                 <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
               </a>
             </div>
-            <a href={startPage}>Overview</a>
             { if (isLoggedIn) <a href={userService createLogoutURL thisURL} class="login">Log out</a>
               else <a href={userService createLoginURL thisURL} class="login">Log in</a>
             }
+            <a href={startPage}>Overview</a>
           </div>
         </body>
       </html>
@@ -126,7 +126,9 @@ class FlicksScalatraFilter extends ScalatraFilter {
         var h2 = $('#pastFilms'),
             ul = h2.siblings('ul');
         ul.hide();
-        h2.data('visible', false).click(function(){{
+        h2.data('visible', false)
+        .editableHover()
+        .click(function(){{
           var visible = !h2.data('visible');
           h2.data('visible', visible);
           if (visible) ul.slideDown();

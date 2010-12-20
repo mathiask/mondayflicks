@@ -1,5 +1,13 @@
+$.fn.editableHover = function(){
+  var element = this;
+  element.hover(function(){element.addClass("editable-highlighted");},
+                function(){element.removeClass("editable-highlighted");});
+  return this;
+};
+
 $.fn.editable = function(callback){
   this.addClass("editable")
+  .editableHover()
   .click(function() {
     var el = $(this),
         text = el.text();
@@ -16,5 +24,5 @@ $.fn.editable = function(callback){
         el.show();
     });
   });
-}
-
+  return this;
+};
