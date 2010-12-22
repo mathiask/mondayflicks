@@ -8,7 +8,7 @@ import org.scalatra._
 
 import com.google.appengine.api.users.User
 
-class MondayFlicksScalatraFilter extends ScalatraFilter {
+class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
 
   object Template {
 
@@ -92,7 +92,10 @@ class MondayFlicksScalatraFilter extends ScalatraFilter {
   private def thisURL = request.getRequestURI
 
 
-  get("/") { redirect(startPage) }
+  get("/") { 
+    info("Redirecting to start page...")
+    redirect(startPage) 
+  }
 
   get(startPage) {
     Template.page("Monday Flicks", 
@@ -308,8 +311,10 @@ class MondayFlicksScalatraFilter extends ScalatraFilter {
 
   get("/user/principal") {
     val user = currentUser
-    request.getUserPrincipal + ", admin: " + isAdmin +
-    " / " + user.getNickname + "(" + user.getEmail + ")"
+    val principal = 
+      request.getUserPrincipal + ", admin: " + isAdmin + " / " + user.getNickname + "(" + user.getEmail + ")"
+    debug("Principal: " + principal)
+    principal
   }
 
 }
