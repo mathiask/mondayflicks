@@ -8,7 +8,7 @@
 
   <filter>
     <filter-name>scalatra</filter-name>
-    <filter-class>com.example.FlicksScalatraFilter</filter-class>
+    <filter-class>com.appspot.mondayflicks.MondayFlicksScalatraFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>scalatra</filter-name>

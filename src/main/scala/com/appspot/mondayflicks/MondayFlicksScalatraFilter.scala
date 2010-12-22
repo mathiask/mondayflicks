@@ -1,4 +1,4 @@
-package com.example
+package com.appspot.mondayflicks
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -8,7 +8,7 @@ import org.scalatra._
 
 import com.google.appengine.api.users.User
 
-class FlicksScalatraFilter extends ScalatraFilter {
+class MondayFlicksScalatraFilter extends ScalatraFilter {
 
   object Template {
 

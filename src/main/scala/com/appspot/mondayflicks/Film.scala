@@ -1,4 +1,4 @@
-package com.example
+package com.appspot.mondayflicks
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
