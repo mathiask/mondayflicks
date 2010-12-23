@@ -7,25 +7,11 @@ import Level._
 
 /** A thin wrapper around JDK logging. */
 trait Logging {
-  val logger: Logger
+  lazy val logger = Logger getLogger (getClass.getName)
 
-  def getLogger(clz: Class[_]): Logger = getLogger(clz.getName)
-  def getLogger(name: String):Logger = Logger getLogger name
+  def warn(msg: => String) = if (logger isLoggable WARNING) log(WARNING, msg)
+  def info(msg: => String) = if (logger isLoggable INFO) log(INFO, msg)
+  def debug(msg: => String) = if (logger isLoggable FINE) log(FINE, msg)
 
-  def warn(msg: => String) = if (logger isLoggable WARNING) logger.warning(msg)
-  def info(msg: => String) = if (logger isLoggable INFO) logger.info(msg)
-  def debug(msg: => String) = if (logger isLoggable FINE) logger.fine(msg)
-}
-
-
-class SingleLineFormatter extends Formatter {
-
-  private val dateFormat = new SimpleDateFormat("yyyyMMdd:HHmmss.SSS")
-
-  override def format(record: LogRecord) = 
-    dateFormat.format(new Date(record.getMillis)) + " " + 
-    record.getLevel + " " +
-    record.getLoggerName + " " + 
-    record.getMessage
-
+  private def log(level: Level, msg: String) = logger.logp(level, null, null, msg)
 }

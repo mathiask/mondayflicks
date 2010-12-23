@@ -10,8 +10,6 @@ import com.google.appengine.api.users.User
 
 class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
 
-  lazy val logger = getLogger("test")
-
   object Template {
 
     def style() =
