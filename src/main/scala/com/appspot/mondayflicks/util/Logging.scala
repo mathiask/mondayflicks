@@ -1,8 +1,6 @@
 package com.appspot.mondayflicks.util
 
-import java.util.Date
-import java.util.logging.{Logger, Level, Formatter, LogRecord}
-import java.text.SimpleDateFormat
+import java.util.logging.{Logger, Level}
 import Level._
 
 /** A thin wrapper around JDK logging. */
