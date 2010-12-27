@@ -1,10 +1,11 @@
 package com.appspot.mondayflicks
 
+import util.DateOnly
+
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-import java.util.{Date, Calendar, GregorianCalendar, TimeZone}
-import Calendar._
+import java.util.Date
 
 import javax.jdo.annotations._
 
@@ -21,7 +22,7 @@ class Film {
   @Persistent private var imdbId: String = _
   @Persistent var user: User = _
   @Persistent var created: Date = _
-  @Persistent var scheduledFor: Date = _
+  @Persistent private var scheduledFor: Date = _
   @Persistent 
   @Order(extensions = Array(new Extension(vendorName = "datanucleus", key = "list-ordering", value = "created")))
   private var commentList: java.util.List[FilmComment] = _
@@ -46,17 +47,11 @@ class Film {
   def add(comment: FilmComment) = commentList.add(comment)
 
   def isScheduled = scheduledFor != null
-  def scheduledOption = Option(scheduledFor)
+  def scheduled = {assert(isScheduled); DateOnly(scheduledFor)}
+  def scheduledOption = if (isScheduled) Some(scheduled) else None
+  def scheduled_=(date: DateOnly) = scheduledFor = date.toDate 
 
-  def isPast = isScheduled && isBeforeToday
-
-  private def isBeforeToday = {
-    val today = new GregorianCalendar
-    val cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"))
-    cal.setTime(scheduledFor)
-    cal.get(YEAR) < today.get(YEAR) || 
-      cal.get(YEAR) == today.get(YEAR) && cal.get(DAY_OF_YEAR) < today.get(DAY_OF_YEAR)
-  }
+  def isPast = isScheduled && scheduled.isBeforeToday
 }
 
 

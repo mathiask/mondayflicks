@@ -1,7 +1,8 @@
 package com.appspot.mondayflicks
 
+import util.DateOnly
+
 import java.text.SimpleDateFormat
-import java.util.Date
 
 import scala.xml._
 import org.scalatra._
@@ -115,7 +116,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
           { for (film <- films) yield <li>
               <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
               { if (film.hasImdbLink) <span>(<a href={ film.imdbLink } target="_blank">IMDB</a>)</span> }
-              { if (film.isScheduled) <span>: scheduled for <b>{ dateFormat.format(film.scheduledFor) }</b></span> }
+              { if (film.isScheduled) <span>: scheduled for <b>{ film.scheduled }</b></span> }
             </li>
           }
         </ul>
@@ -224,9 +225,9 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
       </form>
     else <span/>
 
-  private def scheduleFilmForm(id: String, scheduled: Option[Date]) = 
+  private def scheduleFilmForm(id: String, scheduled: Option[DateOnly]) = 
     if (scheduled.isDefined || isAdmin) {
-      val dateString = scheduled.flatMap(o => Some(dateFormat format o)).getOrElse("")
+      val dateString = scheduled.flatMap(o => Some(o.toString)).getOrElse("")
       <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for 
         { if (isAdmin) {
             <input id="scheduledFor" type="text" name="scheduledFor" value={ dateString }/>

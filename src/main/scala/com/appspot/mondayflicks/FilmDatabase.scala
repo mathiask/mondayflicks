@@ -1,11 +1,11 @@
 package com.appspot.mondayflicks
 
+import util.DateOnly
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
 import javax.jdo.{JDOHelper, PersistenceManagerFactory, PersistenceManager}
-
-import java.util.Date
 
 import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
@@ -67,7 +67,7 @@ object FilmDatabase {
     })
   }
 
-  def schedule(id: String, date: Date) {
-    withPersistenceManager(doGetFilm(_, id).scheduledFor = date)
+  def schedule(id: String, date: DateOnly) {
+    withPersistenceManager(doGetFilm(_, id).scheduled = date)
   }
 }
