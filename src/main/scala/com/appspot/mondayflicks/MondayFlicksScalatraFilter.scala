@@ -318,4 +318,14 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
     principal
   }
 
+  get("/admin/cal/public") {
+    val feed = XML.load("http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/public/full")
+    feed \\ "title" text
+  }
+
+  get("/admin/cal/private") {
+    val feed = XML.load("http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/private/full")
+    feed \\ "title" text
+  }
+
 }
