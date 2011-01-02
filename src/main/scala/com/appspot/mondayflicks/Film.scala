@@ -15,7 +15,7 @@ import com.google.appengine.api.users.User
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
 class Film {
 
-  @PrimaryKey 
+  @PrimaryKey
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _
   @Persistent var title: String = _
@@ -23,7 +23,7 @@ class Film {
   @Persistent var user: User = _
   @Persistent var created: Date = _
   @Persistent private var scheduledFor: Date = _
-  @Persistent 
+  @Persistent
   @Order(extensions = Array(new Extension(vendorName = "datanucleus", key = "list-ordering", value = "created")))
   private var commentList: java.util.List[FilmComment] = _
 
@@ -49,7 +49,7 @@ class Film {
   def isScheduled = scheduledFor != null
   def scheduled = {assert(isScheduled); DateOnly(scheduledFor)}
   def scheduledOption = if (isScheduled) Some(scheduled) else None
-  def scheduled_=(date: DateOnly) = scheduledFor = date.toDate 
+  def scheduled_=(date: DateOnly) = scheduledFor = date.toDate
 
   def isPast = isScheduled && scheduled.isBeforeToday
 }
@@ -68,7 +68,7 @@ object Film {
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
 class FilmComment {
-  @PrimaryKey 
+  @PrimaryKey
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _
 

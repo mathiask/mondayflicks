@@ -1,7 +1,7 @@
 package com.appspot.mondayflicks
 
 import com.google.api.client.googleapis.json._
-import com.google.api.client.http._ 
+import com.google.api.client.http._
 import com.google.api.client.auth.oauth._
 
 import util._
@@ -31,7 +31,7 @@ abstract class OAuthResourceReader(token: String, secret: String) extends Loggin
       debug("Redirecting...")
       if (e.response.statusCode != 302) throw e
       request.url =  new GenericUrl(e.response.headers.location)
-      request.execute       
+      request.execute
     }
   }
 }

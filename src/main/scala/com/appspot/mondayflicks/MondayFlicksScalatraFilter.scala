@@ -14,7 +14,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   override def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
-    calendarReader = 
+    calendarReader =
       new CalendarReader(config.getInitParameter("calendar-token"), config.getInitParameter("calendar-secret"))
   }
 
@@ -100,23 +100,23 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   private def thisURL = request.getRequestURI
 
 
-  get("/") { 
+  get("/") {
     info("Redirecting to start page...")
-    redirect(startPage) 
+    redirect(startPage)
   }
 
   get(startPage) {
-    Template.page("Monday Flicks", 
-                  Seq(filmList(<h2 id="pastFilms" class="clickable">Past Films</h2>, _.isPast), 
+    Template.page("Monday Flicks",
+                  Seq(filmList(<h2 id="pastFilms" class="clickable">Past Films</h2>, _.isPast),
                       pastFilmsScript,
-                      filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}), 
-                      filmList(<h2>Proposed Films</h2>, ! _.isScheduled), 
+                      filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}),
+                      filmList(<h2>Proposed Films</h2>, ! _.isScheduled),
                       newFilmForm))
   }
 
   private def filmList(title: NodeSeq, filmPredicate: Film => Boolean) = {
     val films = FilmDatabase.allFilms filter filmPredicate
-    if (films.nonEmpty) 
+    if (films.nonEmpty)
       <div>
         { title }
         <ul>
@@ -148,8 +148,8 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       }});
     </script>
 
-  private def newFilmForm = 
-    if (isLoggedIn) 
+  private def newFilmForm =
+    if (isLoggedIn)
       <form action="/user/film" method="POST">
         <h2>Create new film entry</h2>
         <input id="film" type="text" name="film"/>
@@ -174,7 +174,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   get("/film/:id") {
     val id = params('id)
     val film = FilmDatabase.getFilm(id)
-    Template.page("Film Details", 
+    Template.page("Film Details",
                   Seq(<h2><span id="filmTitle">{ film.title }</span></h2>,
                       renameFilmScript(id),
                       filmTitleAndImdbForm(id, film),
@@ -187,7 +187,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
                   scripts = List("jquery-ui-1.8.7.custom.min.js"))
   }
 
-  private def renameFilmScript(id: String) = 
+  private def renameFilmScript(id: String) =
     <script>
       mondayflicks.renameFile = function(txt) {{
         var trimmedText = $.trim(txt);
@@ -207,7 +207,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       { imdbForm(film.imdbLink) }
     </form>
 
-  private def imdbForm(imdbLink: String) = 
+  private def imdbForm(imdbLink: String) =
     if (isLoggedIn) Seq(<input id="text" type="text" name="imdb" size="40" value={ imdbLink }/>,
                         <input id="update" type="submit" value="Update"/>,
                         showUpdateButtonScript)
@@ -226,16 +226,16 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
     </script>
 
   private def deleteFilmForm(id: String) =
-    if (isAdmin) 
+    if (isAdmin)
       <form action={ "/admin/film/" + id + "/delete" } method="POST">
-        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
+        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>
       </form>
     else <span/>
 
-  private def scheduleFilmForm(id: String, scheduled: Option[DateOnly]) = 
+  private def scheduleFilmForm(id: String, scheduled: Option[DateOnly]) =
     if (scheduled.isDefined || isAdmin) {
       val dateString = scheduled.flatMap(o => Some(o.toString)).getOrElse("")
-      <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for 
+      <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for
         { if (isAdmin) {
             <input id="scheduledFor" type="text" name="scheduledFor" value={ dateString }/>
             <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$/);"/>
@@ -248,8 +248,8 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
         }
       </form>
     } else <div><em>As yet unscheduled.</em></div>
-    
-  
+
+
   private def comments(id: String, comments: Seq[FilmComment]) =
     <div>
       { for (comment <- comments) yield
@@ -260,11 +260,11 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
         </div>
       }
     </div>
-     
+
   private def deleteCommentForm(id: String, keyString: String, user: User) =
-    if (isAdmin || currentUser == user) 
+    if (isAdmin || currentUser == user)
       <form action={ "/user/film/" + id + "/" + keyString + "/delete" } method="POST">
-        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>         
+        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>
       </form>
     else <span/>
 
@@ -312,7 +312,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   get("/user/principal") {
     val user = currentUser
-    val principal = 
+    val principal =
       request.getUserPrincipal + ", admin: " + isAdmin + " / " + user.getNickname + "(" + user.getEmail + ")"
     debug("Principal: " + principal)
     principal
@@ -327,4 +327,3 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   }
 
 }
-
