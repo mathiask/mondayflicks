@@ -2,8 +2,6 @@ package com.appspot.mondayflicks
 
 import util.DateOnly
 
-import java.text.SimpleDateFormat
-
 import scala.xml._
 import org.scalatra._
 
@@ -85,7 +83,6 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
 
   private val startPage = "/flicks"
   private lazy val userService = com.google.appengine.api.users.UserServiceFactory.getUserService
-  private def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
   private def currentUser = userService.getCurrentUser
   private def isLoggedIn = request.getUserPrincipal != null
@@ -297,7 +294,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
   }
 
   post("/admin/film/:id/schedule") {
-    FilmDatabase.schedule(params('id), dateFormat.parse(params('scheduledFor)))
+    FilmDatabase.schedule(params('id), DateOnly(params('scheduledFor)))
     redirect("/film/" + params('id))
   }
 
