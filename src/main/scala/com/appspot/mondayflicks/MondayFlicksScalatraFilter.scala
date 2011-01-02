@@ -1,13 +1,23 @@
 package com.appspot.mondayflicks
 
-import util.DateOnly
+import util._
+import javax.servlet.FilterConfig
 
 import scala.xml._
 import org.scalatra._
 
 import com.google.appengine.api.users.User
 
-class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
+class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
+
+  var calendarReader: CalendarReader = _
+
+  override def initialize(config: FilterConfig): Unit = {
+    super.initialize(config)
+    calendarReader = 
+      new CalendarReader(config.getInitParameter("calendar-token"), config.getInitParameter("calendar-secret"))
+  }
+
 
   object Template {
 
@@ -300,13 +310,6 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
 
   // --------------------------------------------------------------------------------
 
-//   get("/admin/migrate") {
-//     for (film <- FilmDatabase.allFilms) FilmDatabase.migrateFilm(film.id.toString, currentUser)
-//     redirect(startPage)
-//   }
-
-  // --------------------------------------------------------------------------------
-
   get("/user/principal") {
     val user = currentUser
     val principal = 
@@ -315,40 +318,13 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with util.Logging {
     principal
   }
 
-  
-  import com.google.api.client.googleapis._
-  import com.google.api.client.googleapis.json._
-  import com.google.api.client.http._ 
-
   get("/admin/cal/public") {
     XML.load("http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/public/full") \ "title" text
   }
 
   get("/admin/cal/private") {
-    val transport = new HttpTransport
-    transport.defaultHeaders.put("GData-Version", "2")
-    transport.addParser(new JsonCParser)
-    val request = transport.buildGetRequest
-    val url = new GoogleUrl("http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/public/full")
-    url.alt = "jsonc"
-    url.prettyprint = true
-    request.url = url
-    // request.execute.parseAsString
-    val feed = request.execute.parseAs(classOf[Feed])
-    feed.title + "\n" + feed.items
+    calendarReader.readCalendar
   }
 
 }
 
-
-class Feed {
-  import com.google.api.client.util.Key
-  @Key var title: String = _
-  @Key var items: java.util.List[Item] = _      
-}
-
-class Item {
-  import com.google.api.client.util.Key
-  @Key var title: String = _
-  override def toString = "Title: " + title
-}
