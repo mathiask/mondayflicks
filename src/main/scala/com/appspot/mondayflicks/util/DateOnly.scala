@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat
 import java.util.{Date, Calendar, GregorianCalendar, TimeZone}
 import Calendar._
 
+import com.google.api.client.util.DateTime
+
 /** I am a Java Data considered up to day, ignoring time. */
 class DateOnly(date: Date) {
   import DateOnly._
@@ -42,8 +44,10 @@ object DateOnly {
   private[util] var dateFactory = () => new Date
 
   implicit def apply(date: Date): DateOnly = new DateOnly(date)
+  implicit def apply(dateTime: DateTime): DateOnly = new DateOnly(new Date(dateTime.value))
   def apply(iso8601String: String): DateOnly = apply(dateFormat parse iso8601String)
   def today = apply(dateFactory())
 
   implicit def dateOnlyToDate(d: DateOnly) = d.toDate
+  implicit def dateOnlyToDateTime(d: DateOnly) = new DateTime(true, d.toDate.getTime, 0)
 }

@@ -10,12 +10,12 @@ import com.google.appengine.api.users.User
 
 class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
-  var calendarReader: CalendarReader = _
+  var calendar: CalendarAccess = _
 
   override def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
-    calendarReader =
-      new CalendarReader(config.getInitParameter("calendar-token"), config.getInitParameter("calendar-secret"))
+    calendar =
+      new CalendarAccess(config.getInitParameter("calendar-token"), config.getInitParameter("calendar-secret"))
   }
 
 
@@ -318,12 +318,12 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
     principal
   }
 
-  get("/admin/cal/public") {
-    XML.load("http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/public/full") \ "title" text
+  get("/admin/cal/private") {
+    calendar.readCalendar
   }
 
-  get("/admin/cal/private") {
-    calendarReader.readCalendar
+  get("/admin/cal/private/create/:title") {
+    calendar.create(params('title))
   }
 
 }

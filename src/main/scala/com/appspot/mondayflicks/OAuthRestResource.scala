@@ -6,7 +6,7 @@ import com.google.api.client.auth.oauth._
 
 import util._
 
-abstract class OAuthResourceReader(token: String, secret: String) extends Logging {
+abstract class OAuthRestResource(token: String, secret: String) extends Logging {
   private val transport = new HttpTransport
   transport.defaultHeaders.put("GData-Version", "2")
   transport.addParser(new JsonCParser)
@@ -25,13 +25,22 @@ abstract class OAuthResourceReader(token: String, secret: String) extends Loggin
   def getFollowingRedirect(url: GenericUrl): HttpResponse = {
     val request = transport.buildGetRequest
     request.url = url
-    try  {
-      return request.execute
-    } catch { case e: HttpResponseException =>
+    executeFollowingRedirect(request)
+  }
+
+  private def executeFollowingRedirect(request: HttpRequest): HttpResponse = 
+    try request.execute
+    catch { case e: HttpResponseException =>
       debug("Redirecting...")
       if (e.response.statusCode != 302) throw e
       request.url =  new GenericUrl(e.response.headers.location)
       request.execute
     }
+
+  def postFollowingRedirect(url: GenericUrl, content: HttpContent): HttpResponse = {
+    val request = transport.buildPostRequest
+    request.url = url
+    request.content = content
+    executeFollowingRedirect(request)
   }
 }
