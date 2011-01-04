@@ -67,7 +67,8 @@ object FilmDatabase {
     })
   }
 
-  def schedule(id: String, date: DateOnly) {
-    withPersistenceManager(doGetFilm(_, id).scheduled = date)
-  }
+  /** Get a film in transaction context. */
+  def withFilm(id: String)(callback: Film => Unit) =  
+    withPersistenceManager(pm => callback(doGetFilm(pm, id)))
+      
 }

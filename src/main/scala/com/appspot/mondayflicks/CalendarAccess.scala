@@ -14,10 +14,18 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
     feed.title + "\n" + feed.items
   }
 
-  def create(title: String) = {
-    import util.DateOnly.today
+  def create(film: Film) = try {
     val content = new JsonCContent
-    content.data = Event(title, today, today)
+    content.data = Event(film.title, film.scheduled)
+    val event = postFollowingRedirect(url, content).parseAs(classOf[Event])
+    event.id
+  } catch { // don't fail because of calendar
+    case e => warn(e); ""
+  }
+
+  def create(title: String) = {
+    val content = new JsonCContent
+    content.data = Event(title, util.DateOnly.today)
     val event = postFollowingRedirect(url, content).parseAs(classOf[Event])
     event.id
   }
@@ -35,13 +43,13 @@ class Event {
   override def toString = "Title: " + title + "(" + when + ") [#" + id + "]"
 }
 object Event {
-  def apply(title: String, start: DateTime, end: DateTime) = {
+  def apply(title: String, day: DateTime) = {
     import scala.collection.JavaConversions._
     val item = new Event
     item.title = title
     val when = new EventSchedule
-    when.start = start
-    when.end = end
+    when.start = day
+    when.end = day
     item.when = List(when)
     item
   }

@@ -14,8 +14,8 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   override def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
-    calendar =
-      new CalendarAccess(config.getInitParameter("calendar-token"), config.getInitParameter("calendar-secret"))
+    calendar = new CalendarAccess(config getInitParameter "calendar-token", 
+                                  config getInitParameter "calendar-secret")
   }
 
 
@@ -179,7 +179,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
                       renameFilmScript(id),
                       filmTitleAndImdbForm(id, film),
                       deleteFilmForm(id),
-                      scheduleFilmForm(id, film.scheduledOption),
+                      scheduleFilmForm(id, film.scheduledOption, film.isInCalendar),
                       <div class="user">Added by {film.userNickname} on {film.created}.</div>,
                       <h2>Comments</h2>,
                       comments(id, film.comments),
@@ -232,13 +232,14 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       </form>
     else <span/>
 
-  private def scheduleFilmForm(id: String, scheduled: Option[DateOnly]) =
+  private def scheduleFilmForm(id: String, scheduled: Option[DateOnly], isInCalendar: Boolean) =
     if (scheduled.isDefined || isAdmin) {
       val dateString = scheduled.flatMap(o => Some(o.toString)).getOrElse("")
       <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for
         { if (isAdmin) {
             <input id="scheduledFor" type="text" name="scheduledFor" value={ dateString }/>
             <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$/);"/>
+            <span>{ if (!isInCalendar) <b>Not in calendar!</b> }</span>
             <script>
               $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
             </script>
@@ -304,11 +305,15 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   }
 
   post("/admin/film/:id/schedule") {
-    FilmDatabase.schedule(params('id), DateOnly(params('scheduledFor)))
+    FilmDatabase.withFilm(params('id)) { film =>
+      film.scheduled = DateOnly(params('scheduledFor))
+      if (film.isInCalendar) { /* TODO */ }
+      else film.calendarId = calendar.create(film)
+    }
     redirect("/film/" + params('id))
   }
 
-  // --------------------------------------------------------------------------------
+  // ==================== Test methods ====================
 
   get("/user/principal") {
     val user = currentUser

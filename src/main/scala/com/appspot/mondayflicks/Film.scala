@@ -26,6 +26,7 @@ class Film {
   @Persistent
   @Order(extensions = Array(new Extension(vendorName = "datanucleus", key = "list-ordering", value = "created")))
   private var commentList: java.util.List[FilmComment] = _
+  @Persistent var calendarId: String = _
 
   def id: Long = key.getId
 
@@ -52,6 +53,8 @@ class Film {
   def scheduled_=(date: DateOnly) = scheduledFor = date.toDate
 
   def isPast = isScheduled && scheduled.isBeforeToday
+
+  def isInCalendar = calendarId != null
 }
 
 
