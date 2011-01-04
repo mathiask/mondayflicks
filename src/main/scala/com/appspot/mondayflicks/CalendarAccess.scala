@@ -1,5 +1,7 @@
 package com.appspot.mondayflicks
 
+import scala.collection.JavaConversions._
+
 import com.google.api.client.util.{Key, DateTime}
 import com.google.api.client.googleapis.json.JsonCContent
 import com.google.api.client.googleapis.GoogleUrl
@@ -12,7 +14,7 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
   url.prettyprint = true
 
   def readCalendar: String = {
-    val feed =  getFollowingRedirect(url).parseAs(classOf[Feed])
+    val feed = getFollowingRedirect(url).parseAs(classOf[Feed])
     feed.title + "\n" + feed.items
   }
 
@@ -24,7 +26,7 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
     debug("... with id " + event.id)
     event.id
   } catch { // don't fail because of calendar
-    case e => error(e); e.printStackTrace; null
+    case e => error(e); null
   }
 
   def create(title: String) = {
@@ -37,15 +39,46 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
   def delete(id: String) {
     debug("Deleting film " + id + "...")
     if (id == null) return
-    try deleteUrl(urlFor(id))
+    try delete(urlFor(id))
     catch { // don't fail because of calendar
-      case e => warn(e)
+      case e => error(e)
     }
   }
 
   private def urlFor(id: String) = {
     new GoogleUrl(baseUrlString + "/" + id)
   }
+
+  def reschedule(film: Film) = syncNameAndDate(film)
+
+  def syncNameAndDate(film: Film) = try {
+    assert(film.calendarId != null)
+    val event = readEvent(film.calendarId)
+    event.title = film.title
+    event.setStartAndEnd(film.scheduled)
+    put(event)
+  } catch { // don't fail because of calendar
+    case e => error(e)
+  }
+
+  private def readEvent(id :String) =
+    getFollowingRedirect(jasonUrlFor(id)).parseAs(classOf[Event])
+
+  private def jasonUrlFor(id: String) = {
+    val result = urlFor(id)
+    result.alt = "jsonc"
+    result
+  }
+
+  private def put(event: Event): Unit = try {
+    val content = new JsonCContent
+    content.data = event
+    put(jasonUrlFor(event.id), content)
+  } catch { // don't fail because of calendar
+    case e => error(e)
+  }
+
+  def rename(film: Film) = syncNameAndDate(film)
 
 }
 
@@ -59,6 +92,13 @@ class Event {
   @Key var title: String = _
   @Key var when: java.util.List[EventSchedule] = _
   override def toString = "Title: " + title + "(" + when + ") [#" + id + "]"
+
+  def setStartAndEnd(day: DateTime) {
+    assert(when.size == 1)
+    val es = when.head
+    es.start = day
+    es.end = day
+  }
 }
 object Event {
   def apply(title: String, day: DateTime) = {
@@ -78,4 +118,3 @@ class EventSchedule {
   @Key var end: DateTime = _
   override def toString = start + " - " + end
 }
-

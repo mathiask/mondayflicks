@@ -14,7 +14,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   override def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
-    calendar = new CalendarAccess(config getInitParameter "calendar-token", 
+    calendar = new CalendarAccess(config getInitParameter "calendar-token",
                                   config getInitParameter "calendar-secret")
   }
 
@@ -292,7 +292,10 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   }
 
   post("/user/film/:id/rename") {
-    FilmDatabase.renameFilm(params('id), params('title))
+    FilmDatabase.withFilm(params('id)) { film =>
+      film.title = params('title)
+      if (film.isInCalendar) calendar.rename(film)
+    }
   }
 
   post("/admin/film/:id/delete") {
@@ -317,18 +320,16 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
     redirect("/film/" + params('id))
   }
 
-  private def unschedule(film: Film) { 
+  private def unschedule(film: Film) {
     calendar.delete(film.calendarId)
     film.unschedule
   }
 
   private def schedule(film: Film, date: DateOnly) {
     film.scheduled = date
-    if (film.isInCalendar) { 
-      debug("is in calendar")
-      /* TODO cal */ 
+    if (film.isInCalendar) {
+      calendar.reschedule(film)
     } else film.calendarId = calendar.create(film)
-    
   }
 
   // ==================== Test methods ====================

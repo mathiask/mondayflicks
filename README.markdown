@@ -18,8 +18,6 @@ Technology Stack
 
 TODOs
 -----
-* Scheduled films
-  * link to Google calendar
 * Twitter feed
 * Links to film lists
 * Atom feeds

@@ -51,10 +51,6 @@ object FilmDatabase {
     withPersistenceManager(doGetFilm(_, id).add(FilmComment(user, comment)))
   }
 
-  def renameFilm(id: String, title: String) {
-    withPersistenceManager(doGetFilm(_, id).title = title)
-  }
-
   def deleteFilm(id: String) {
     withPersistenceManager(pm => pm.deletePersistent(doGetFilm(pm, id)))
   }
@@ -70,5 +66,5 @@ object FilmDatabase {
   /** Get a film in transaction context. */
   def withFilm(id: String)(callback: Film => Unit) =  
     withPersistenceManager(pm => callback(doGetFilm(pm, id)))
-      
+
 }
