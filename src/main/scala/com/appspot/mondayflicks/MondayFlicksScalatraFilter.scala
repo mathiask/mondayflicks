@@ -238,8 +238,9 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for
         { if (isAdmin) {
             <input id="scheduledFor" type="text" name="scheduledFor" value={ dateString }/>
-            <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$/);"/>
-            <span>{ if (!isInCalendar) <b>Not in calendar!</b> }</span>
+            <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$|^$/);"/>
+            <span>{ if (scheduled.isDefined) { <input type="submit" value="Unschedule" onclick="$('#scheduledFor').val('')"/>
+                      <span>{ if (!isInCalendar) <b> Not in calendar!</b> }</span>}}</span>
             <script>
               $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
             </script>
@@ -306,11 +307,19 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   post("/admin/film/:id/schedule") {
     FilmDatabase.withFilm(params('id)) { film =>
-      film.scheduled = DateOnly(params('scheduledFor))
-      if (film.isInCalendar) { /* TODO */ }
-      else film.calendarId = calendar.create(film)
+      val scheduledFor = params('scheduledFor)
+      if (scheduledFor.isEmpty) unschedule(film)
+      else schedule(film, DateOnly(scheduledFor))
     }
     redirect("/film/" + params('id))
+  }
+
+  private def unschedule(film: Film) { film.unschedule /* TODO cal */ }
+
+  private def schedule(film: Film, date: DateOnly) {
+    if (film.isInCalendar) { /* TODO cal */ }
+    else film.calendarId = calendar.create(film)
+    film.scheduled = date
   }
 
   // ==================== Test methods ====================

@@ -51,6 +51,7 @@ class Film {
   def scheduled = {assert(isScheduled); DateOnly(scheduledFor)}
   def scheduledOption = if (isScheduled) Some(scheduled) else None
   def scheduled_=(date: DateOnly) = scheduledFor = date.toDate
+  def unschedule = scheduledFor = null
 
   def isPast = isScheduled && scheduled.isBeforeToday
 
