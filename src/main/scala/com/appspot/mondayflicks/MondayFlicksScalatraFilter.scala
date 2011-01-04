@@ -296,7 +296,10 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   }
 
   post("/admin/film/:id/delete") {
-    FilmDatabase.deleteFilm(params('id))
+    val id = params('id)
+    val film = FilmDatabase.getFilm(id)
+    FilmDatabase.deleteFilm(id)
+    calendar.delete(film.calendarId)
     redirect(startPage)
   }
 
@@ -307,19 +310,25 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   post("/admin/film/:id/schedule") {
     FilmDatabase.withFilm(params('id)) { film =>
-      val scheduledFor = params('scheduledFor)
+      val scheduledFor = params('scheduledFor).trim
       if (scheduledFor.isEmpty) unschedule(film)
       else schedule(film, DateOnly(scheduledFor))
     }
     redirect("/film/" + params('id))
   }
 
-  private def unschedule(film: Film) { film.unschedule /* TODO cal */ }
+  private def unschedule(film: Film) { 
+    calendar.delete(film.calendarId)
+    film.unschedule
+  }
 
   private def schedule(film: Film, date: DateOnly) {
-    if (film.isInCalendar) { /* TODO cal */ }
-    else film.calendarId = calendar.create(film)
     film.scheduled = date
+    if (film.isInCalendar) { 
+      debug("is in calendar")
+      /* TODO cal */ 
+    } else film.calendarId = calendar.create(film)
+    
   }
 
   // ==================== Test methods ====================

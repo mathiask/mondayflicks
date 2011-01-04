@@ -43,4 +43,12 @@ abstract class OAuthRestResource(token: String, secret: String) extends Logging 
     request.content = content
     executeFollowingRedirect(request)
   }
+
+  def deleteUrl(url: GenericUrl) { 
+    val request = transport.buildDeleteRequest
+    request.url = url
+    request.headers.ifMatch = "*"
+    request.execute
+  }
+
 }

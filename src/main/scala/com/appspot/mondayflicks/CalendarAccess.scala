@@ -5,7 +5,9 @@ import com.google.api.client.googleapis.json.JsonCContent
 import com.google.api.client.googleapis.GoogleUrl
 
 class CalendarAccess(token: String, secret: String) extends OAuthRestResource(token, secret) with util.Logging {
-  val url = new GoogleUrl("http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/private/full")
+
+  private val baseUrlString = "http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/private/full"
+  private val url = new GoogleUrl(baseUrlString)
   url.alt = "jsonc"
   url.prettyprint = true
 
@@ -15,12 +17,14 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
   }
 
   def create(film: Film) = try {
+    debug("Creating film...")
     val content = new JsonCContent
     content.data = Event(film.title, film.scheduled)
     val event = postFollowingRedirect(url, content).parseAs(classOf[Event])
+    debug("... with id " + event.id)
     event.id
   } catch { // don't fail because of calendar
-    case e => warn(e); ""
+    case e => error(e); e.printStackTrace; null
   }
 
   def create(title: String) = {
@@ -29,6 +33,20 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
     val event = postFollowingRedirect(url, content).parseAs(classOf[Event])
     event.id
   }
+
+  def delete(id: String) {
+    debug("Deleting film " + id + "...")
+    if (id == null) return
+    try deleteUrl(urlFor(id))
+    catch { // don't fail because of calendar
+      case e => warn(e)
+    }
+  }
+
+  private def urlFor(id: String) = {
+    new GoogleUrl(baseUrlString + "/" + id)
+  }
+
 }
 
 class Feed {
