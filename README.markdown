@@ -19,7 +19,6 @@ Technology Stack
 TODOs
 -----
 * Twitter feed
-* Links to film lists
 * Atom feeds
   * DIY
   * using Twitter's feeds?
