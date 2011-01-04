@@ -32,11 +32,13 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       |}
       |#main {
       |  background-color: #eeeeee;
-      |  border: 1px solid #003b6b;
+      |  border: 2px solid #003b6b;
       |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
       |  padding: 2ex;
       |}
-      |h1 { color: #005580; }
+      |h1 { color: #005580; margin-top: 0px; }
+      |h3 { margin: 0px; color: #003b6b; }
+      |span.item { margin-right: 1em; }
       |a { color: #404040; }
       |a:hover, .editable-highlighted { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
@@ -51,13 +53,30 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       |  border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
       |  width: 40em; margin-bottom: 2ex;
       |}
+      |div.sidebar {
+      |  float: right;
+      |  margin: 1ex;
+      |  padding: 1ex;
+      |  background-color: #e0e0e0;
+      |  border: 1px solid #003b6b;
+      |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
+      |  width: 33%;
+      |}
+      |div.sidebar ul {
+      | list-style-type: none;
+      |}
+      |img.icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5em;}
       |div.appengine, a.login {
       |  float: right;
       |  margin-left: 1ex;
       |}
       """.stripMargin
 
-    def page(title:String, content:NodeSeq, message:Option[Any] = None, scripts:List[String] = Nil) = {
+    def page(title:String, 
+             content:NodeSeq, 
+             sidebar: Option[NodeSeq] = None,
+             message:Option[Any] = None, 
+             scripts:List[String] = Nil) = {
       <html>
         <head>
           <title>{ title }</title>
@@ -71,6 +90,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
         </head>
         <body>
           <div id="main">
+            { if (sidebar.isDefined) <div class="sidebar">{ sidebar.get }</div> }
             <h1>{ title }</h1>
             { content }
             <hr/>
@@ -111,7 +131,22 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
                       pastFilmsScript,
                       filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}),
                       filmList(<h2>Proposed Films</h2>, ! _.isScheduled),
-                      newFilmForm))
+                      newFilmForm),
+                  sidebar = Some(startPageSidebar))
+  }
+
+  private def startPageSidebar = {
+      <h3>Social</h3>
+      <div><a target="_blank"
+          href="https://www.google.com/calendar/embed?src=pvbp2e5h4t4mhigof30lkq5abc@group.calendar.google.com">
+          <img class="icon" src="static/images/google_calendar.png"/>Google Calendar</a></div>
+      <div><a target="_blank" href="http://twitter.com/#!/mondayflicks"><img class="icon" src="static/images/twitter.png"/>Twitter</a></div>
+      <hr/>
+      <h3>Film Lists</h3>
+      <div><a target="_blank" href="http://www.imdb.com/chart/top">IMDb Top 250</a></div>
+      <div><a target="_blank" href="http://en.wikipedia.org/wiki/1001_Movies_You_Must_See_Before_You_Die#25_Movies_You_Must_See_Before_You_Die">25
+        Movies You Must See...</a></div>
+      <div>...</div>
   }
 
   private def filmList(title: NodeSeq, filmPredicate: Film => Boolean) = {
@@ -119,14 +154,12 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
     if (films.nonEmpty)
       <div>
         { title }
-        <ul>
-          { for (film <- films) yield <li>
-              <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
-              { if (film.hasImdbLink) <span>(<a href={ film.imdbLink } target="_blank">IMDB</a>)</span> }
-              { if (film.isScheduled) <span>: scheduled for <b>{ film.scheduled }</b></span> }
-            </li>
-          }
-        </ul>
+        { for (film <- films) yield <div>
+            { if (film.isScheduled) <span class="item"><em>{ film.scheduled }</em></span> }
+            <a href={ "/film/" + film.id }>&#8220;{ film.title }&#8221;</a>
+            { if (film.hasImdbLink) <span>(<a href={ film.imdbLink } target="_blank">IMDb</a>)</span> }
+          </div>
+        }
       </div>
     else <!-- no films in category -->
   }
@@ -135,15 +168,15 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
     <script>
       $(function(){{
         var h2 = $('#pastFilms'),
-            ul = h2.siblings('ul');
-        ul.hide();
+            divs = h2.siblings('div');
+        divs.hide();
         h2.data('visible', false)
         .editableHover()
         .click(function(){{
           var visible = !h2.data('visible');
           h2.data('visible', visible);
-          if (visible) ul.slideDown();
-          else ul.slideUp();
+          if (visible) divs.slideDown();
+          else divs.slideUp();
         }});
       }});
     </script>
@@ -203,7 +236,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   private def filmTitleAndImdbForm(id: String, film: Film) =
     <form action={ "/user/film/" + id } method="POST">
-      <a href={ film.imdbLinkOrSearch } target="_blank">IMDB-Link</a>
+      <a href={ film.imdbLinkOrSearch } target="_blank">IMDb-Link</a>
       { imdbForm(film.imdbLink) }
     </form>
 
