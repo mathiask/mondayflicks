@@ -1,21 +1,20 @@
 package com.appspot.mondayflicks
 
 import util._
-import javax.servlet.FilterConfig
 
 import scala.xml._
 import org.scalatra._
 
+import javax.servlet.FilterConfig
+
 import com.google.appengine.api.users.User
 
-class MondayFlicksScalatraFilter extends ScalatraFilter with Scripts with Logging {
-
-  var calendar: CalendarAccess = _
+class MondayFlicksScalatraFilter extends ScalatraFilter 
+with UserSupport with CalendarAccessSupport with Scripts with Logging {
 
   override def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
-    calendar = new CalendarAccess(config getInitParameter "calendar-token",
-                                  config getInitParameter "calendar-secret")
+    initializeCalendar(config)
   }
 
   object Template {
@@ -92,8 +91,8 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Scripts with Loggin
                 <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
               </a>
             </div>
-            { if (isLoggedIn) <a href={userService createLogoutURL thisURL} class="login">Log out</a>
-              else <a href={userService createLoginURL thisURL} class="login">Log in</a>
+            { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
+              else <a href={loginURL} class="login">Log in</a>
             }
             <a href={startPage}>Overview</a>
           </div>
@@ -103,12 +102,6 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Scripts with Loggin
   }
 
   private val startPage = "/flicks"
-  private lazy val userService = com.google.appengine.api.users.UserServiceFactory.getUserService
-
-  private def currentUser = userService.getCurrentUser
-  private def isLoggedIn = request.getUserPrincipal != null
-  private def isAdmin = request.isUserInRole("admin")
-  private def thisURL = request.getRequestURI
 
   get("/") {
     info("Redirecting to start page...")
@@ -359,24 +352,6 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Scripts with Loggin
     if (film.isInCalendar) {
       calendar.reschedule(film)
     } else film.calendarId = calendar.create(film)
-  }
-
-  // ==================== Test methods ====================
-
-  get("/user/principal") {
-    val user = currentUser
-    val principal =
-      request.getUserPrincipal + ", admin: " + isAdmin + " / " + user.getNickname + "(" + user.getEmail + ")"
-    debug("Principal: " + principal)
-    principal
-  }
-
-  get("/admin/cal/private") {
-    calendar.readCalendar
-  }
-
-  get("/admin/cal/private/create/:title") {
-    calendar.create(params('title))
   }
 
 }

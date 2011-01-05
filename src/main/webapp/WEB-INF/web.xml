@@ -6,6 +6,15 @@
 
   <display-name>Monday Flicks</display-name>
 
+  <context-param>
+    <param-name>calendar-token</param-name>
+    <param-value>ACCESS TOKEN</param-value>    
+  </context-param>
+  <context-param>
+    <param-name>calendar-secret</param-name>
+    <param-value>TOKEN SECRET</param-value>
+  </context-param>
+
   <filter>
     <filter-name>scalatra</filter-name>
     <filter-class>com.appspot.mondayflicks.MondayFlicksScalatraFilter</filter-class>
@@ -20,6 +29,15 @@
   </filter>
   <filter-mapping>
     <filter-name>scalatra</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>authentication</filter-name>
+    <filter-class>com.appspot.mondayflicks.AuthenticationScalatraFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>authentication</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
