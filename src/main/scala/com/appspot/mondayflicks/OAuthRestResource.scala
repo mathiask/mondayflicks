@@ -6,17 +6,18 @@ import com.google.api.client.auth.oauth._
 
 import util._
 
-abstract class OAuthRestResource(token: String, secret: String) extends Logging {
+class OAuthRestResource(token: String, secret: String,
+    consumerKey: String = "anonymous", consumerSecret: String = "anonymous") extends Logging {
   private val transport = new HttpTransport
   transport.defaultHeaders.put("GData-Version", "2")
   transport.addParser(new JsonCParser)
 
-  val signer = new OAuthHmacSigner
-  signer.clientSharedSecret = "anonymous"
+  private val signer = new OAuthHmacSigner
+  signer.clientSharedSecret = consumerSecret
   signer.tokenSharedSecret = secret
 
   private val parameters = new OAuthParameters
-  parameters.consumerKey = "anonymous"
+  parameters.consumerKey = consumerKey
   parameters.token = token
   parameters.signer = signer
 
@@ -28,7 +29,7 @@ abstract class OAuthRestResource(token: String, secret: String) extends Logging 
     executeFollowingRedirect(request)
   }
 
-  private def executeFollowingRedirect(request: HttpRequest): HttpResponse = 
+  private def executeFollowingRedirect(request: HttpRequest): HttpResponse =
     try request.execute
     catch { case e: HttpResponseException =>
       debug("Redirecting...")
@@ -44,14 +45,14 @@ abstract class OAuthRestResource(token: String, secret: String) extends Logging 
     executeFollowingRedirect(request)
   }
 
-  def delete(url: GenericUrl) { 
+  def delete(url: GenericUrl) {
     val request = transport.buildDeleteRequest
     request.url = url
     request.headers.ifMatch = "*"
     request.execute
   }
 
-  def put(url: GenericUrl, content: HttpContent) { 
+  def put(url: GenericUrl, content: HttpContent) {
     val request = transport.buildPutRequest
     request.url = url
     request.headers.ifMatch = "*"

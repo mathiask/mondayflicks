@@ -1,20 +1,15 @@
 package com.appspot.mondayflicks
 
 import util._
+
 import org.scalatra._
 
-import javax.servlet.FilterConfig
-
 /**
- * I contain helper functions for authentication like the OAuth "dance".
+ * I contain test functions for authentication like the OAuth "dance".
+ * The application runs also without this filter.
  */
 class AuthenticationScalatraFilter extends ScalatraFilter 
-with CalendarAccessSupport with UserSupport with Logging {
-
-  override def initialize(config: FilterConfig): Unit = {
-    super.initialize(config)
-    initializeCalendar(config)
-  }
+with CalendarAccessSupport with TweeterSupport with UserSupport with Logging {
 
   get("/user/principal") {
     val user = currentUser
@@ -31,5 +26,14 @@ with CalendarAccessSupport with UserSupport with Logging {
   get("/admin/cal/private/create/:title") {
     calendar.create(params('title))
   }
+
+  get("/admin/twitter") {
+    tweeter.homeTimeline
+  }
+
+  get("/admin/tweet/:status") {
+    tweeter.tweet(params('status))
+  }
+
 }
 

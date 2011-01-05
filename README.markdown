@@ -18,7 +18,6 @@ Technology Stack
 
 TODOs
 -----
-* Twitter feed
 * Atom feeds
   * DIY
   * using Twitter's feeds?

@@ -10,12 +10,8 @@ import javax.servlet.FilterConfig
 import com.google.appengine.api.users.User
 
 class MondayFlicksScalatraFilter extends ScalatraFilter 
-with UserSupport with CalendarAccessSupport with Scripts with Logging {
-
-  override def initialize(config: FilterConfig): Unit = {
-    super.initialize(config)
-    initializeCalendar(config)
-  }
+with UserSupport with CalendarAccessSupport with TweeterSupport with Scripts 
+with Logging {
 
   object Template {
     def style() =
@@ -103,6 +99,11 @@ with UserSupport with CalendarAccessSupport with Scripts with Logging {
 
   private val startPage = "/flicks"
 
+  private def tweet(status: String) = tweeter.tweet(status)
+  private val baseURL = "http://mondayflicks.appspot.com"
+  private val startURL = baseURL + startPage
+  private def filmURL(film: Film): String = baseURL + "/film/" + film.id
+
   get("/") {
     info("Redirecting to start page...")
     redirect(startPage)
@@ -189,6 +190,7 @@ with UserSupport with CalendarAccessSupport with Scripts with Logging {
 
   post("/user/film") {
     FilmDatabase.addFilm(params('film), currentUser)
+    tweet("New film created " + startURL)
     redirect(startPage)
   }
 
@@ -310,6 +312,8 @@ with UserSupport with CalendarAccessSupport with Scripts with Logging {
   post("/user/film/:id/comment") {
     val id = params('id)
     FilmDatabase.addCommentToFilm(id, params("comment"), currentUser)
+    val film = FilmDatabase.getFilm(id)
+    tweet("Comment for " + filmURL(film) + " " + film.title)
     redirect("/film/" + id)
   }
 
@@ -317,6 +321,7 @@ with UserSupport with CalendarAccessSupport with Scripts with Logging {
     FilmDatabase.withFilm(params('id)) { film =>
       film.title = params('title)
       if (film.isInCalendar) calendar.rename(film)
+      tweet("Film " + filmURL(film) + " renamed to " + film.title)
     }
   }
 
@@ -325,6 +330,7 @@ with UserSupport with CalendarAccessSupport with Scripts with Logging {
     val film = FilmDatabase.getFilm(id)
     FilmDatabase.deleteFilm(id)
     calendar.delete(film.calendarId)
+    tweet("Film " + film.title + " deleted")
     redirect(startPage)
   }
 
@@ -336,8 +342,14 @@ with UserSupport with CalendarAccessSupport with Scripts with Logging {
   post("/admin/film/:id/schedule") {
     FilmDatabase.withFilm(params('id)) { film =>
       val scheduledFor = params('scheduledFor).trim
-      if (scheduledFor.isEmpty) unschedule(film)
-      else schedule(film, DateOnly(scheduledFor))
+      if (scheduledFor.isEmpty) {
+        unschedule(film)
+        tweet("Unscheduled " + filmURL(film) + " " + film.title)
+      }
+      else {
+        schedule(film, DateOnly(scheduledFor))
+        tweet("Scheduled " + filmURL(film) + " " + film.title + " for " + film.scheduled)
+      }
     }
     redirect("/film/" + params('id))
   }
