@@ -6,14 +6,13 @@
 
   <display-name>Monday Flicks</display-name>
 
-  <!--
   <context-param>
     <param-name>calendar-token</param-name>
     <param-value>1/e7FaaUnBHxPftlwypToVO9ZiCZPhH1dTIleVdRQyOao</param-value>
   </context-param>
   <context-param>
     <param-name>calendar-token-secret</param-name>
-    <param-value>SECRET</param-value>
+    <param-value>Brlp7y3qSgZen0Ku/bVePHPL</param-value>
   </context-param>
 
   <context-param>
@@ -22,7 +21,7 @@
   </context-param>
   <context-param>
     <param-name>twitter-consumer-secret</param-name>
-    <param-value>SECRET</param-value>
+    <param-value>nGaUfrgS74GKi4OZILzH9DZhtCdMVZKEBHHvwZ9tK8</param-value>
   </context-param>
   <context-param>
     <param-name>twitter-token</param-name>
@@ -30,9 +29,8 @@
   </context-param>
   <context-param>
     <param-name>twitter-token-secret</param-name>
-    <param-value>SECRET</param-value>
+    <param-value>GytcfcpDBOjbELJ5EC25opKgcMuQncoo3XhybhisWaE</param-value>
   </context-param>
-  -->
 
   <session-config> 
     <session-timeout>60</session-timeout>   <!-- minutes of inactivity --> 
