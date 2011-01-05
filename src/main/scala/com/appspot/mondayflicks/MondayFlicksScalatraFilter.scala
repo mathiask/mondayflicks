@@ -8,7 +8,7 @@ import org.scalatra._
 
 import com.google.appengine.api.users.User
 
-class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
+class MondayFlicksScalatraFilter extends ScalatraFilter with Scripts with Logging {
 
   var calendar: CalendarAccess = _
 
@@ -18,9 +18,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
                                   config getInitParameter "calendar-secret")
   }
 
-
   object Template {
-
     def style() =
       """
       |body {
@@ -42,11 +40,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       |a { color: #404040; }
       |a:hover, .editable-highlighted { background-color: #8ECAE8; }
       |input, textarea { border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
-      |div.user {
-      |  color: gray;
-      |  font-size: small;
-      |  font-style: italic;
-      |}
+      |div.user, span.tiny { color: gray; font-size: small; font-style: italic; font-weight: lighter; }
       |div.comment {
       |  padding: 4px;
       |  border: 2px solid #005580;
@@ -62,20 +56,17 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
       |  width: 33%;
       |}
-      |div.sidebar ul {
-      | list-style-type: none;
+      |div.popup { 
+      |  position: absolute; top: 2ex; left: -1.5em; display: none; z-index: 1;
       |}
       |img.icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5em;}
-      |div.appengine, a.login {
-      |  float: right;
-      |  margin-left: 1ex;
-      |}
+      |div.appengine, a.login { float: right; margin-left: 1ex; }
       """.stripMargin
 
-    def page(title:String, 
-             content:NodeSeq, 
+    def page(title:String,
+             content:NodeSeq,
              sidebar: Option[NodeSeq] = None,
-             message:Option[Any] = None, 
+             message:Option[Any] = None,
              scripts:List[String] = Nil) = {
       <html>
         <head>
@@ -119,7 +110,6 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   private def isAdmin = request.isUserInRole("admin")
   private def thisURL = request.getRequestURI
 
-
   get("/") {
     info("Redirecting to start page...")
     redirect(startPage)
@@ -127,20 +117,22 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
 
   get(startPage) {
     Template.page("Monday Flicks",
-                  Seq(filmList(<h2 id="pastFilms" class="clickable">Past Films</h2>, _.isPast),
+                  Seq(filmList(<h2><span id="pastFilms" class="clickable">Past Films<span class="tiny"> [Click]</span></span></h2>, _.isPast),
                       pastFilmsScript,
                       filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}),
                       filmList(<h2>Proposed Films</h2>, ! _.isScheduled),
                       newFilmForm),
-                  sidebar = Some(startPageSidebar))
+                  sidebar = Some(defaultPageSidebar))
   }
 
-  private def startPageSidebar = {
+  private def defaultPageSidebar = {
       <h3>Social</h3>
-      <div><a target="_blank"
+      <div style="position: relative;"><span>{calendarPopup}<a target="_blank"
           href="https://www.google.com/calendar/embed?src=pvbp2e5h4t4mhigof30lkq5abc@group.calendar.google.com">
-          <img class="icon" src="static/images/google_calendar.png"/>Google Calendar</a></div>
-      <div><a target="_blank" href="http://twitter.com/#!/mondayflicks"><img class="icon" src="static/images/twitter.png"/>Twitter</a></div>
+          <img class="icon" src="/static/images/google_calendar.png"/>Google Calendar</a></span></div>
+      <div style="position: relative;"><span>{twitterPopup}<a target="_blank" href="http://twitter.com/#!/mondayflicks">
+          <img class="icon" src="/static/images/twitter.png"/>Twitter</a></span></div>
+      <div><a target="_blank" href="https://github.com/mathiask/mondayflicks/issues"><img class="icon" src="/static/images/github.png"/>Issues</a></div>
       <hr/>
       <h3>Film Lists</h3>
       <div><a target="_blank" href="http://www.imdb.com/chart/top">IMDb Top 250</a></div>
@@ -148,6 +140,17 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
         Movies You Must See...</a></div>
       <div>...</div>
   }
+
+  private def calendarPopup = <div class="popup" id="calendarPopup">
+    <iframe src="https://www.google.com/calendar/embed?showTitle=0&amp;showNav=0&amp;showDate=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;height=400&amp;wkst=2&amp;bgcolor=%23FFFFFF&amp;src=pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com&amp;color=%23691426&amp;ctz=Europe%2FBerlin&amp;mode=agenda" style="border:solid 1px #777;" width="300" height="300" frameborder="0" scrolling="no"></iframe>
+    { popupScript("calendarPopup") }
+  </div>
+
+  private def twitterPopup =
+    <div class="popup" id="twitterPopup">
+      {twitterScript}
+      {popupScript("twitterPopup")}
+    </div>
 
   private def filmList(title: NodeSeq, filmPredicate: Film => Boolean) = {
     val films = FilmDatabase.allFilms filter filmPredicate
@@ -167,14 +170,14 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
   private def pastFilmsScript =
     <script>
       $(function(){{
-        var h2 = $('#pastFilms'),
-            divs = h2.siblings('div');
+        var trigger = $('#pastFilms'),
+            divs = trigger.parent().siblings('div');
         divs.hide();
-        h2.data('visible', false)
+        trigger.data('visible', false)
         .editableHover()
         .click(function(){{
-          var visible = !h2.data('visible');
-          h2.data('visible', visible);
+          var visible = !trigger.data('visible');
+          trigger.data('visible', visible);
           if (visible) divs.slideDown();
           else divs.slideUp();
         }});
@@ -191,14 +194,6 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
       </form>
     else <span/>
 
-  /** Add an onclick handler to a control cheking that an input widget is non blank. */
-  private def onClickNonBlankScript(controlSelector:String , inputSelector: String) =
-    <script>
-      $(function(){{
-        $('{controlSelector}').click(function(){{return $.trim($('{inputSelector}').val()) !== ''; }});
-      }});
-    </script>
-
   post("/user/film") {
     FilmDatabase.addFilm(params('film), currentUser)
     redirect(startPage)
@@ -208,7 +203,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
     val id = params('id)
     val film = FilmDatabase.getFilm(id)
     Template.page("Film Details",
-                  Seq(<h2><span id="filmTitle">{ film.title }</span></h2>,
+                  Seq(<h2><span id="filmTitle">{ film.title }</span>{ if (isLoggedIn) <span class="tiny"> [Click]</span> }</h2>,
                       renameFilmScript(id),
                       filmTitleAndImdbForm(id, film),
                       deleteFilmForm(id),
@@ -217,6 +212,7 @@ class MondayFlicksScalatraFilter extends ScalatraFilter with Logging {
                       <h2>Comments</h2>,
                       comments(id, film.comments),
                       addCommentForm(id)),
+                  sidebar = Some(defaultPageSidebar),
                   scripts = List("jquery-ui-1.8.7.custom.min.js"))
   }
 
