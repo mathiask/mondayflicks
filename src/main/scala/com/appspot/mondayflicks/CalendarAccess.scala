@@ -39,7 +39,7 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
   def delete(id: String) {
     debug("Deleting film " + id + "...")
     if (id == null) return
-    try delete(urlFor(id))
+    try deleteFollowingRedirect(urlFor(id))
     catch { // don't fail because of calendar
       case e => error(e)
     }
@@ -73,7 +73,7 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
   private def put(event: Event): Unit = try {
     val content = new JsonCContent
     content.data = event
-    put(jasonUrlFor(event.id), content)
+    putFollowingRedirect(jasonUrlFor(event.id), content)
   } catch { // don't fail because of calendar
     case e => error(e)
   }

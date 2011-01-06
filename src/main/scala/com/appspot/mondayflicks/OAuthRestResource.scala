@@ -45,19 +45,19 @@ class OAuthRestResource(token: String, secret: String,
     executeFollowingRedirect(request)
   }
 
-  def delete(url: GenericUrl) {
+  def deleteFollowingRedirect(url: GenericUrl) {
     val request = transport.buildDeleteRequest
     request.url = url
     request.headers.ifMatch = "*"
-    request.execute
+    executeFollowingRedirect(request)
   }
 
-  def put(url: GenericUrl, content: HttpContent) {
+  def putFollowingRedirect(url: GenericUrl, content: HttpContent) {
     val request = transport.buildPutRequest
     request.url = url
     request.headers.ifMatch = "*"
     request.content = content
-    request.execute
+    executeFollowingRedirect(request)
   }
 
 }
