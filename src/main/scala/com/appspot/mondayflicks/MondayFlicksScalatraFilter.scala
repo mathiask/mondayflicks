@@ -51,9 +51,8 @@ with Logging {
       |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
       |  width: 33%;
       |}
-      |div.popup { 
-      |  position: absolute; top: 2ex; left: -1.5em; display: none; z-index: 1;
-      |}
+      |div.popup { position: absolute; top: 2ex; left: -1.5em; display: none; z-index: 1; }
+      |div.error { font-size: large; color: red; }
       |img.icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5em;}
       |div.appengine, a.login { float: right; margin-left: 1ex; }
       """.stripMargin
@@ -100,9 +99,26 @@ with Logging {
   private val startPage = "/flicks"
 
   private def tweet(status: String) = tweeter.tweet(status)
-  private val baseURL = "http://mondayflicks.appspot.com"
-  private val startURL = baseURL + startPage
+  private def baseURL = {
+    val url = request.getRequestURL
+    url.substring(0, url lastIndexOf request.getRequestURI)
+  }
+  private def startURL = baseURL + startPage
   private def filmURL(film: Film): String = baseURL + "/film/" + film.id
+
+  error {
+    caughtThrowable match {
+      case _: javax.jdo.JDOObjectNotFoundException =>
+        Template.page("Illegal Access",
+                      <div class="error">The film or comment does not (or no longer) exists.</div>
+                      <div><a href={startPage}>Restart</a></div>)
+      case t => 
+        error(t)
+        Template.page("Error",
+                      <div class="error">Internal server error.</div>
+                      <div><a href={startPage}>Restart</a></div>)      
+    }
+  }
 
   get("/") {
     info("Redirecting to start page...")
