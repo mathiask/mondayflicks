@@ -47,6 +47,7 @@ with Logging {
       |  border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
       |  width: 40em; margin-bottom: 2ex;
       |}
+      |input.delete { float: right; }
       |div.sidebar {
       |  float: right;
       |  margin: 1ex;
@@ -228,18 +229,21 @@ with Logging {
     val id = params('id)
     val film = FilmDatabase.getFilm(id)
     Template.page("Film Details",
-                  Seq(<h2><span id="filmTitle">{ film.title }</span>{ if (isLoggedIn) <span class="tiny"> [Click]</span> }</h2>,
+                  Seq(filmTitle(film.title),
                       renameFilmScript(id),
-                      filmTitleAndImdbForm(id, film),
-                      deleteFilmForm(id),
+                      imdbForm(id, film),
                       scheduleFilmForm(id, film.scheduledOption, film.isInCalendar),
                       <div class="user">Added by {film.userNickname} on {film.created}.</div>,
+                      deleteFilmForm(id),
                       <h2>Comments</h2>,
                       comments(id, film.comments),
                       addCommentForm(id)),
                   sidebar = Some(defaultPageSidebar),
                   scripts = List("jquery-ui-1.8.7.custom.min.js"))
   }
+
+  private def filmTitle(title: String) =
+    <h2><span id="filmTitle">{ title }</span>{ if (isLoggedIn) <span class="tiny"> [Click]</span> }</h2>
 
   private def renameFilmScript(id: String) =
     <script>
@@ -255,13 +259,13 @@ with Logging {
       { if (isLoggedIn) "$('#filmTitle').editable(mondayflicks.renameFile);" }
     </script>
 
-  private def filmTitleAndImdbForm(id: String, film: Film) =
+  private def imdbForm(id: String, film: Film) =
     <form action={ "/user/film/" + id } method="POST">
       <a href={ film.imdbLinkOrSearch } target="_blank">IMDb-Link</a>
-      { imdbForm(film.imdbLink) }
+      { imdbLinkInput(film.imdbLink) }
     </form>
 
-  private def imdbForm(imdbLink: String) =
+  private def imdbLinkInput(imdbLink: String) =
     if (isLoggedIn) Seq(<input id="text" type="text" name="imdb" size="40" value={ imdbLink }/>,
                         <input id="update" type="submit" value="Update"/>,
                         showUpdateButtonScript)
@@ -279,24 +283,24 @@ with Logging {
       }});
     </script>
 
-  private def deleteFilmForm(id: String) =
-    if (isAdmin)
-      <form action={ "/admin/film/" + id + "/delete" } method="POST">
-        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>
-      </form>
-    else <span/>
-
   private def scheduleFilmForm(id: String, scheduled: Option[DateOnly], isInCalendar: Boolean) =
     if (scheduled.isDefined || isAdmin) {
       val dateString = scheduled.flatMap(o => Some(o.toString)).getOrElse("")
       <form action={ "/admin/film/" + id + "/schedule" } method="POST">Scheduled for
         { if (isAdmin) {
             <input id="scheduledFor" type="text" name="scheduledFor" value={ dateString }/>
-            <input type="submit" value="Change" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$|^$/);"/>
+            <input id="schedule" type="submit" value="Schedule" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$|^$/);"/>
             <span>{ if (scheduled.isDefined) { <input type="submit" value="Unschedule" onclick="$('#scheduledFor').val('')"/>
                       <span>{ if (!isInCalendar) <b> Not in calendar!</b> }</span>}}</span>
             <script>
-              $(function(){{ $('#scheduledFor').datepicker({{firstDay: 1, dateFormat: 'yy-mm-dd'}}); }});
+              $(function(){{ 
+                $('#schedule').hide();
+                $('#scheduledFor').datepicker({{
+                  firstDay: 1, 
+                  dateFormat: 'yy-mm-dd',
+                  onSelect: function(){{ $('#schedule').click(); }}
+                }}); 
+              }});
             </script>
           } else {
             <span>{ dateString }</span>
@@ -305,14 +309,22 @@ with Logging {
       </form>
     } else <div><em>As yet unscheduled.</em></div>
 
+  private def deleteFilmForm(id: String) =
+    if (isAdmin)
+      <form action={ "/admin/film/" + id + "/delete" } method="POST">
+        <input type="submit" value="Delete film" onclick="return confirm('Please confirm!');"/>
+      </form>
+    else <span/>
 
   private def comments(id: String, comments: Seq[FilmComment]) =
     <div>
       { for (comment <- comments) yield
         <div>
           <div class="user">{ comment.userNickname }, { comment.created }</div>
-          <div class="comment">{ comment.text }</div>
-          { deleteCommentForm(id, comment.keyString, comment.user) }
+          <div class="comment">
+            { deleteCommentForm(id, comment.keyString, comment.user) }
+            { comment.text }
+          </div>
         </div>
       }
     </div>
@@ -320,7 +332,7 @@ with Logging {
   private def deleteCommentForm(id: String, keyString: String, user: User) =
     if (isAdmin || currentUser == user)
       <form action={ "/user/film/" + id + "/" + keyString + "/delete" } method="POST">
-        <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>
+        <input type="submit" class="delete" value="Delete" onclick="return confirm('Please confirm!');"/>
       </form>
     else <span/>
 
