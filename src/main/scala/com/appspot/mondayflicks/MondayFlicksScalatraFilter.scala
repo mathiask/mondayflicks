@@ -3,8 +3,10 @@ package com.appspot.mondayflicks
 import util._
 
 import scala.xml._
+import scala.xml.dtd.{DocType, PublicID}
 import org.scalatra._
 
+import java.io.StringWriter
 import javax.servlet.FilterConfig
 
 import com.google.appengine.api.users.User
@@ -14,7 +16,7 @@ with UserSupport with CalendarAccessSupport with TweeterSupport with Scripts
 with Logging {
 
   object Template {
-    def style() =
+    private val style =
       """
       |body {
       |  font-family: Trebuchet MS, sans-serif;
@@ -24,10 +26,13 @@ with Logging {
       |  background-color: white;
       |}
       |#main {
+      |  padding: 2ex;
       |  background-color: #eeeeee;
       |  border: 2px solid #003b6b;
       |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
-      |  padding: 2ex;
+      |}
+      |#content {
+      |  min-height: 180px;
       |}
       |h1 { color: #005580; margin-top: 0px; }
       |h3 { margin: 0px; color: #003b6b; }
@@ -57,42 +62,51 @@ with Logging {
       |div.appengine, a.login { float: right; margin-left: 1ex; }
       """.stripMargin
 
+    private val doctype = DocType("html", PublicID("-//W3C//DTD XHTML 1.0 Strict//EN",
+                                                   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"), 
+                                  Nil)
+
     def page(title:String,
              content:NodeSeq,
              sidebar: Option[NodeSeq] = None,
              message:Option[Any] = None,
              scripts:List[String] = Nil) = {
-      <html>
-        <head>
-          <title>{ title }</title>
-          <style>{ Template.style }</style>
-          <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
-          <script src="http://www.google.com/jsapi"></script>
-          <script>google.load('jquery', '1.4.4');</script>
-          <script src="/static/jquery.editable.js"></script>
-          { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
-          <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
-        </head>
-        <body>
-          <div id="main">
-            { if (sidebar.isDefined) <div class="sidebar">{ sidebar.get }</div> }
-            <h1>{ title }</h1>
-            { content }
-            <hr/>
-            { message.getOrElse("") }
-            { if (message.isDefined) <hr/> }
-            <div class="appengine">
-              <a href="http://code.google.com/appengine/" target="_blank">
-                <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
-              </a>
+      val doc =
+        <html>
+          <head>
+            <title>{ title }</title>
+            <style>{ Template.style }</style>
+            <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
+            <script src="http://www.google.com/jsapi"></script>
+            <script>google.load('jquery', '1.4.4');</script>
+            <script src="/static/jquery.editable.js"></script>
+            { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
+            <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
+          </head>
+          <body>
+            <div id="main">
+              { if (sidebar.isDefined) <div class="sidebar">{ sidebar.get }</div> }
+              <h1>{ title }</h1>
+              <div id="content">{ content }</div>
+              <hr/>
+              { message.getOrElse("") }
+              { if (message.isDefined) <hr/> }
+              <div class="appengine">
+                <a href="http://code.google.com/appengine/" target="_blank">
+                  <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
+                </a>
+              </div>
+              { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
+                else <a href={loginURL} class="login">Log in</a>
+              }
+              <a href={startPage}>Overview</a>
             </div>
-            { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
-              else <a href={loginURL} class="login">Log in</a>
-            }
-            <a href={startPage}>Overview</a>
-          </div>
-        </body>
-      </html>
+          </body>
+        </html>
+      val writer = new StringWriter
+      XML.write(writer, doc, "UTF-8", true, doctype)
+      contentType = "text/html"
+      writer.toString
     }
   }
 
@@ -145,7 +159,7 @@ with Logging {
       <div><a target="_blank" href="https://github.com/mathiask/mondayflicks/issues"><img class="icon" src="/static/images/github.png"/>Issues</a></div>
       <hr/>
       <h3>Film Lists</h3>
-      <div><a target="_blank" href="http://www.imdb.com/chart/top">IMDb Top 250</a></div>
+      <div><a target="_blank" href={Film.imdbURL + "/chart/top"}>IMDb Top 250</a></div>
       <div><a target="_blank" href="http://en.wikipedia.org/wiki/1001_Movies_You_Must_See_Before_You_Die#25_Movies_You_Must_See_Before_You_Die">25
         Movies You Must See...</a></div>
       <div>...</div>

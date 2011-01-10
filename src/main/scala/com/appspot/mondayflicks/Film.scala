@@ -15,6 +15,8 @@ import com.google.appengine.api.users.User
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
 class Film {
 
+  import Film.imdbURL
+
   @PrimaryKey
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _
@@ -31,7 +33,7 @@ class Film {
   def id: Long = key.getId
 
   def imdbLink = if (imdbId == null) "" else imdbLinkForId
-  private def imdbLinkForId = "http://www.imdb.com/title/tt" + imdbId + "/"
+  private def imdbLinkForId = imdbURL + "/title/tt" + imdbId + "/"
   def imdbLink_=(url: String) {
     val re = ".*?([0-9]+).*?".r
     imdbId = url match {
@@ -39,7 +41,7 @@ class Film {
       case _ => null
     }
   }
-  def imdbLinkOrSearch  = if (imdbId == null) "http://www.imdb.com/find?s=all&q=" + title else imdbLinkForId
+  def imdbLinkOrSearch  = if (imdbId == null) imdbURL + "/find?s=all&q=" + title else imdbLinkForId
   def hasImdbLink = imdbId != null
 
   def userNickname = user.getNickname
@@ -71,6 +73,8 @@ object Film {
     film.title = title
     film
   }
+
+  val imdbURL = "http://akas.imdb.com"
 }
 
 
