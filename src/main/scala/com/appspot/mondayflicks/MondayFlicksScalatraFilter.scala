@@ -78,8 +78,7 @@ with Logging {
             <title>{ title }</title>
             <style>{ Template.style }</style>
             <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
-            <script src="http://www.google.com/jsapi"></script>
-            <script>google.load('jquery', '1.4.4');</script>
+            <script src="/static/jquery-1.4.4.min.js"></script>
             <script src="/static/jquery.editable.js"></script>
             { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
             <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
@@ -94,7 +93,7 @@ with Logging {
               { if (message.isDefined) <hr/> }
               <div class="appengine">
                 <a href="http://code.google.com/appengine/" target="_blank">
-                  <img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
+                  <img src="/static/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
                 </a>
               </div>
               { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
