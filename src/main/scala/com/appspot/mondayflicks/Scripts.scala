@@ -12,26 +12,26 @@ trait Scripts {
 
   protected def twitterScript = {
     <script src="http://widgets.twimg.com/j/2/widget.js"></script>
-    <script>
-    new TWTR.Widget({{
+    <script><xml:unparsed>
+    new TWTR.Widget({
       version: 2,
       type: 'profile',
       rpp: 4,
       interval: 6000,
       width: 300,
       height: 300,
-      theme: {{
-        shell: {{
+      theme: {
+        shell: {
           background: '#333333',
           color: '#ffffff'
-        }},
-        tweets: {{
+        },
+        tweets: {
           background: '#000000',
           color: '#ffffff',
           links: '#8ECAE8'
-        }}
-      }},
-      features: {{
+        }
+      },
+      features: {
         scrollbar: false,
         loop: false,
         live: false,
@@ -39,9 +39,9 @@ trait Scripts {
         timestamp: true,
         avatars: false,
         behavior: 'all'
-      }}
-    }}).render().setUser('mondayflicks').start();
-    </script>
+      }
+    }).render().setUser('mondayflicks').start();
+    </xml:unparsed></script>
   }
 
   /** Add an onclick handler to a control cheking that an input widget is non blank. */
@@ -51,6 +51,5 @@ trait Scripts {
         $('{controlSelector}').click(function(){{return $.trim($('{inputSelector}').val()) !== ''; }});
       }});
     </script>
-
 
 }

@@ -5,7 +5,7 @@ import util._
 import org.scalatra._
 
 /**
- * I contain test functions for authentication like the OAuth "dance".
+ * I contain test functions for authentication.
  * The application runs also without this filter.
  */
 class AuthenticationScalatraFilter extends ScalatraFilter 

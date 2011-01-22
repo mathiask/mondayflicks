@@ -192,21 +192,21 @@ with Logging {
   }
 
   private def pastFilmsScript =
-    <script>
-      $(function(){{
+    <script><xml:unparsed>
+      $(function(){
         var trigger = $('#pastFilms'),
             divs = trigger.parent().siblings('div');
         divs.hide();
         trigger.data('visible', false)
         .editableHover()
-        .click(function(){{
+        .click(function(){
           var visible = !trigger.data('visible');
           trigger.data('visible', visible);
           if (visible) divs.slideDown();
           else divs.slideUp();
-        }});
-      }});
-    </script>
+        });
+      });
+    </xml:unparsed></script>
 
   private def newFilmForm =
     if (isLoggedIn)
@@ -271,16 +271,16 @@ with Logging {
     else Seq()
 
   private def showUpdateButtonScript =
-    <script>
-      $(function(){{
+    <script><xml:unparsed>
+      $(function(){
         $('#text').hide().data('visible', false);
-        $('#update').click(function(){{
+        $('#update').click(function(){
           var text = $('#text');
-          if (!text.data('visible')) {{ text.show().data('visible', true); return false; }}
+          if (!text.data('visible')) { text.show().data('visible', true); return false; }
           else return $.trim(text.val()) !== '';
-        }});
-      }});
-    </script>
+        });
+      });
+    </xml:unparsed></script>
 
   private def scheduleFilmForm(id: String, scheduled: Option[DateOnly], isInCalendar: Boolean) =
     if (scheduled.isDefined || isAdmin) {
@@ -291,16 +291,16 @@ with Logging {
             <input id="schedule" type="submit" value="Schedule" onclick="return !!$.trim($('#scheduledFor').val()).match(/^\d{4}-\d{2}-\d{2}$|^$/);"/>
             <span>{ if (scheduled.isDefined) { <input type="submit" value="Unschedule" onclick="$('#scheduledFor').val('')"/>
                       <span>{ if (!isInCalendar) <b> Not in calendar!</b> }</span>}}</span>
-            <script>
-              $(function(){{ 
+            <script><xml:unparsed>
+              $(function(){
                 $('#schedule').hide();
-                $('#scheduledFor').datepicker({{
+                $('#scheduledFor').datepicker({
                   firstDay: 1, 
                   dateFormat: 'yy-mm-dd',
-                  onSelect: function(){{ $('#schedule').click(); }}
-                }}); 
-              }});
-            </script>
+                  onSelect: function(){ $('#schedule').click(); }
+                }); 
+              });
+            </xml:unparsed></script>
           } else {
             <span>{ dateString }</span>
           }
