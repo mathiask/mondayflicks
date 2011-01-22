@@ -1,14 +1,36 @@
 package com.appspot.mondayflicks
 
+import util.Logging
 import scala.collection.JavaConversions._
 
 import com.google.api.client.util.{Key, DateTime}
 import com.google.api.client.googleapis.json.JsonCContent
 import com.google.api.client.googleapis.GoogleUrl
 
-class CalendarAccess(token: String, secret: String) extends OAuthRestResource(token, secret) with util.Logging {
+trait CalendarAccess {
+  def readCalendar: String
+  def create(film: Film): String
+  def create(title: String): String
+  def delete(id: String): Unit
+  def reschedule(film: Film): Unit
+  def rename(film: Film): Unit
+}
 
-  private val baseUrlString = "http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/private/full"
+class DummyCalendarAccess extends CalendarAccess with Logging {
+  def readCalendar = "dummy calendar"
+  def create(film: Film) = { info("Dummy create calendar for " + film); "dummy" }
+  def create(title: String) = { info("Dummy create calendar for " + title); "dummy" }
+  def delete(id: String) = info("Dummy calendar deleting " + id)
+  def reschedule(film: Film) = info("Dummy rescheduling " + film)
+  def rename(film: Film) = info("Dummy renaming " + film)
+}
+
+
+class GoogleCalendarAccess(token: String, secret: String) extends OAuthRestResource(token, secret) 
+with Logging with CalendarAccess {
+
+  private val baseUrlString = 
+    "http://www.google.com/calendar/feeds/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com/private/full"
   private val url = new GoogleUrl(baseUrlString)
   url.alt = "jsonc"
   url.prettyprint = true
@@ -51,7 +73,7 @@ class CalendarAccess(token: String, secret: String) extends OAuthRestResource(to
 
   def reschedule(film: Film) = syncNameAndDate(film)
 
-  def syncNameAndDate(film: Film) = try {
+  private def syncNameAndDate(film: Film) = try {
     assert(film.calendarId != null)
     val event = readEvent(film.calendarId)
     event.title = film.title

@@ -1,5 +1,6 @@
 package com.appspot.mondayflicks
 
+import util.Logging
 import collection.{Map, SortedMap}
 import scala.collection.JavaConversions._
 
@@ -8,7 +9,20 @@ import java.net.URLEncoder
 import com.google.api.client.http._
 import com.google.api.client.auth.oauth._
 
-class Tweeter(consumerKey: String , consumerSecret: String, token: String, tokenSecret: String) extends util.Logging {
+trait Tweeter {
+  def homeTimeline: String
+  def tweet(status: String): Unit
+}
+
+class DummyTweeter extends Tweeter with Logging {
+  def homeTimeline = "dummy timeline"
+  def tweet(status: String) = info("Dummy-Tweet: " + status)
+}
+
+
+class TwitterTweeter(consumerKey: String , consumerSecret: String, token: String, tokenSecret: String) 
+extends Logging with Tweeter {
+
   val oauth =
     new OAuthRestResource(token, tokenSecret, consumerKey, consumerSecret)
   val signer = new OAuthHmacSigner

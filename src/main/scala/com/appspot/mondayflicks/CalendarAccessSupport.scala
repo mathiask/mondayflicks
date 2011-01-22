@@ -3,7 +3,7 @@ package com.appspot.mondayflicks
 import javax.servlet.FilterConfig
 import org.scalatra._
 
-trait CalendarAccessSupport extends Initializable {
+trait CalendarAccessSupport extends Initializable with util.Logging {
 
   override type Config = FilterConfig
 
@@ -12,8 +12,13 @@ trait CalendarAccessSupport extends Initializable {
   override abstract def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
     val context = config.getServletContext
-    calendar = new CalendarAccess(context getInitParameter "calendar-token",
-                                  context getInitParameter "calendar-token-secret")
+    val calendarToken = context getInitParameter "calendar-token"
+    calendar = if (calendarToken != null) 
+      new GoogleCalendarAccess(calendarToken, context getInitParameter "calendar-token-secret")
+      else {
+        warn("No calendar-token: configuring dummy implementation")
+        new DummyCalendarAccess
+      }
   }
 
 }

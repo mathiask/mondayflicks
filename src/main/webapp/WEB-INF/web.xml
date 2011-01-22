@@ -6,6 +6,7 @@
 
   <display-name>Monday Flicks</display-name>
 
+  <!--
   <context-param>
     <param-name>calendar-token</param-name>
     <param-value>1/e7FaaUnBHxPftlwypToVO9ZiCZPhH1dTIleVdRQyOao</param-value>
@@ -31,6 +32,7 @@
     <param-name>twitter-token-secret</param-name>
     <param-value>SECRET</param-value>
   </context-param>
+  -->
 
   <filter>
     <filter-name>scalatra</filter-name>
