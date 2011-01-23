@@ -45,7 +45,10 @@ with Logging {
                 </a>
               </div>
               { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
-                else <a href={loginURL} class="login">Log in</a>
+                else <xml:group>
+                 <a href={cgLoginURL} class="login">CG Log in</a>
+                 <a href={loginURL} class="login">Google Log in</a>
+                </xml:group>
               }
               <a href={startPage}>Overview</a>
             </div>
