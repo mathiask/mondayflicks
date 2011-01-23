@@ -35,6 +35,15 @@
   -->
 
   <filter>
+    <filter-name>ensureLogin</filter-name>
+    <filter-class>com.appspot.mondayflicks.EnsureLoginFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>ensureLogin</filter-name>
+    <url-pattern>/user/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
     <filter-name>scalatra</filter-name>
     <filter-class>com.appspot.mondayflicks.MondayFlicksScalatraFilter</filter-class>
   </filter>
@@ -44,11 +53,21 @@
   </filter-mapping>
 
   <filter>
-    <filter-name>authentication</filter-name>
+    <filter-name>login</filter-name>
+    <filter-class>com.appspot.mondayflicks.LoginScalatraFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>login</filter-name>
+    <url-pattern>/login</url-pattern>
+    <url-pattern>/login/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>authenticationTest</filter-name>
     <filter-class>com.appspot.mondayflicks.AuthenticationScalatraFilter</filter-class>
   </filter>
   <filter-mapping>
-    <filter-name>authentication</filter-name>
+    <filter-name>authenticationTest</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
@@ -59,7 +78,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Pages for users who are logged in</web-resource-name>
-      <url-pattern>/user/*</url-pattern>
+      <url-pattern>/google/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
