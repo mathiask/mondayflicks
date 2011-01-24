@@ -1,12 +1,12 @@
 package com.appspot.mondayflicks
 
-import org.scalatra.ScalatraFilter
+import org.scalatra.{ScalatraFilter, FlashMapSupport}
 import com.google.appengine.api.users._
 import scala.xml.NodeSeq
 
 class LoginScalatraFilter extends ScalatraFilter
-with Style with UserSupport with util.Logging {
-  val startPage = "/flicks"
+with Style with UserSupport with FlashMapSupport with util.Logging {
+  private val startPage = "/flicks"
 
   def page(title: String, content: NodeSeq) = {
     val doc =
@@ -19,6 +19,7 @@ with Style with UserSupport with util.Logging {
         <body>
           <div id="main">
             <h1>{ title }</h1>
+            { message }
             { content }
             <hr/>
             <div class="appengine">
@@ -34,6 +35,20 @@ with Style with UserSupport with util.Logging {
     asXHTMLWithDocType(doc)
   }
 
+  private def message = {
+    info(flash)
+    if (flash.isDefinedAt("message")) {
+      <div class="error">{ flash("message") } </div>
+    }
+  }
+
+  error {
+    error(caughtThrowable)
+    page("Error",
+         <div class="error">Internal server error.</div>
+         <div><a href={startPage}>Restart</a></div>)
+  }
+
   get("/login") {
     val next = params.getOrElse("next", startPage)
     page("Login",
@@ -43,18 +58,16 @@ with Style with UserSupport with util.Logging {
       <h2>Custom</h2>
       <div><form action="/login/login" method="post">
         <input type="hidden" name="next" value={next}/>
-        <div><div class="label">Email</div><input type="text" name="email"/>@capgemini.com</div>
+        <div><div class="label">Email</div><input type="text" name="email" value={ params.getOrElse("email", "") }/>@capgemini.com</div>
         <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" value="Log in"/></div>
       </form></div>
     </xml:group>)
   }
 
-  // FIXME
-  // 1. move to class
-  // 2. DB and all that...
-  // 3. SSL?
+  // TODO: SSL
   post("/login/login") {
     val email = params('email)
+    // TODO: normalize email: append @capgemini.com if no @ present
     val password = params('pwd)
     if (CGUserDatabase.checkPassword(email, password)) {
       session('user) = new User(email, "local")
@@ -62,17 +75,25 @@ with Style with UserSupport with util.Logging {
       redirect(params('next))
     } else {
       warn("Wrong password for " + email)
-      // FIXME flash
-      redirect("/login")
+      flash("message") = "Wrong email or password"
+      redirect("/login?email=" + email)
     }
   }
+
+  // TODO: get("/login/change"), forward if not logged in
+  // TODO: add link to this page
 
   get("/login/logout") {
     session.remove("user")
     page("Logout", <xml:group>You have been logged out.</xml:group>)
   }
 
+  get("/login/admin") {
+    redirect("/login/admin/users")
+  }
+
   get("/login/admin/users") {
+    // TODO: delete, change password
     page("Manage Users", <form action="/login/admin/user" method="post">
            <div><div class="label">Email</div><input type="text" name="email"/>@capgemini.com</div>
            <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" value="Create"/></div>
@@ -80,7 +101,7 @@ with Style with UserSupport with util.Logging {
   }
 
   post("/login/admin/user") {
-    CGUserDatabase.addUser(params('email), params('pwd))
+    CGUserDatabase.persistUser(params('email), params('pwd))
     redirect("/login/admin/users")
   }
 

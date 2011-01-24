@@ -1,23 +1,37 @@
 package com.appspot.mondayflicks
 
 import javax.jdo.annotations._
+import javax.jdo.JDOObjectNotFoundException
 
 /** I am responsible for the custom log in. */
 object CGUserDatabase extends PersistenceManagerSupport {
-  def addUser(email: String, password: String) {
-    withPersistenceManager(_.makePersistent(CGUser(email, password))) // FIXME SHA
+
+  // TODO: sha1
+
+  def persistUser(email: String, password: String) = 
+    withUser(email) {
+      case Some(user) => user.passwordShaBase64 = password
+      case None => withPersistenceManager(_.makePersistent(CGUser(email, password)))
+    }
+
+  def withUser[T](email: String)(f: Option[CGUser] => T): T = { 
+    withPersistenceManager{ pm =>
+      try 
+        f(Some(pm.getObjectById(classOf[CGUser], email).asInstanceOf[CGUser]))
+      catch {
+        case _: JDOObjectNotFoundException => f(None)
+      }
+    }
   }
 
-  def checkPassword(email: String, password: String): Boolean = {
-    withPersistenceManager(pm => {
-      val user = pm.getObjectById(email).asInstanceOf[CGUser]
-      user.passwordShaBase64 == password
-    })
-  }
+  def checkPassword(email: String, password: String): Boolean = 
+    withUser(email) {
+      case Some(user) => user.passwordShaBase64 == password
+      case None => false
+    }
 }
 
-
-@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
+@PersistenceCapable(identityType = IdentityType.APPLICATION)
 class CGUser {
   @PrimaryKey var email: String = _
   @Persistent var passwordShaBase64: String = _

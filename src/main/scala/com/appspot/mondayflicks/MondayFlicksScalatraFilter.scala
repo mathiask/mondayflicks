@@ -10,53 +10,51 @@ import javax.servlet.FilterConfig
 import com.google.appengine.api.users.User
 
 class MondayFlicksScalatraFilter extends ScalatraFilter
-with Scripts with UserSupport
+with Style with Scripts with UserSupport
 with CalendarAccessSupport with TweeterSupport
 with Logging {
 
-  object Template extends Style {
-    def page(title:String,
-             content:NodeSeq,
-             sidebar: Option[NodeSeq] = None,
-             message:Option[Any] = None,
-             scripts:List[String] = Nil) = {
-      val doc =
-        <html>
-          <head>
-            <title>{ title }</title>
-            <style>{ Template.style }</style>
-            <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
-            <script src="/static/jquery-1.4.4.min.js"></script>
-            <script src="/static/jquery.editable.js"></script>
-            { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
-            <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
-          </head>
-          <body>
-            <div id="main">
-              { if (sidebar.isDefined) <div class="sidebar">{ sidebar.get }</div> }
-              <h1>{ title }</h1>
-              <div id="content">{ content }</div>
-              <hr/>
-              { message.getOrElse("") }
-              { if (message.isDefined) <hr/> }
-              <div class="appengine">
-                <a href="http://code.google.com/appengine/" target="_blank">
-                  <img src="/static/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
-                </a>
-              </div>
-              { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
-                else <xml:group>
-                 <a href={cgLoginURL} class="login">CG Log in</a>
-                 <a href={loginURL} class="login">Google Log in</a>
-                </xml:group>
-              }
-              <a href={startPage}>Overview</a>
+  private def page(title:String,
+                   content:NodeSeq,
+                   sidebar: Option[NodeSeq] = None,
+                   message:Option[Any] = None,
+                   scripts:List[String] = Nil) = {
+    val doc =
+      <html>
+        <head>
+          <title>{ title }</title>
+          <style>{ style }</style>
+          <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
+          <script src="/static/jquery-1.4.4.min.js"></script>
+          <script src="/static/jquery.editable.js"></script>
+          { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
+          <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
+        </head>
+        <body>
+          <div id="main">
+            { if (sidebar.isDefined) <div class="sidebar">{ sidebar.get }</div> }
+            <h1>{ title }</h1>
+            <div id="content">{ content }</div>
+            <hr/>
+            { message.getOrElse("") }
+            { if (message.isDefined) <hr/> }
+            <div class="appengine">
+              <a href="http://code.google.com/appengine/" target="_blank">
+                <img src="/static/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
+              </a>
             </div>
-          </body>
-        </html>
-      contentType = "text/html"
-      asXHTMLWithDocType(doc)
-    }
+            { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
+              else <xml:group>
+               <a href={cgLoginURL} class="login">CG Log in</a>
+               <a href={loginURL} class="login">Google Log in</a>
+              </xml:group>
+            }
+            <a href={startPage}>Overview</a>
+          </div>
+        </body>
+      </html>
+    contentType = "text/html"
+    asXHTMLWithDocType(doc)
   }
 
   private val startPage = "/flicks"
@@ -72,14 +70,14 @@ with Logging {
   error {
     caughtThrowable match {
       case _: javax.jdo.JDOObjectNotFoundException =>
-        Template.page("Illegal Access",
-                      <div class="error">The film or comment does not (or no longer) exists.</div>
-                      <div><a href={startPage}>Restart</a></div>)
+        page("Illegal Access",
+             <div class="error">The film or comment does not (or no longer) exists.</div>
+             <div><a href={startPage}>Restart</a></div>)
       case t =>
         error(t)
-        Template.page("Error",
-                      <div class="error">Internal server error.</div>
-                      <div><a href={startPage}>Restart</a></div>)
+        page("Error",
+             <div class="error">Internal server error.</div>
+             <div><a href={startPage}>Restart</a></div>)
     }
   }
 
@@ -89,13 +87,13 @@ with Logging {
   }
 
   get(startPage) {
-    Template.page("Monday Flicks",
-                  Seq(filmList(<h2><span id="pastFilms" class="clickable">Past Films<span class="tiny"> [Click]</span></span></h2>, _.isPast),
-                      pastFilmsScript,
-                      filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}),
-                      filmList(<h2>Proposed Films</h2>, ! _.isScheduled),
-                      newFilmForm),
-                  sidebar = Some(defaultPageSidebar))
+    page("Monday Flicks",
+         Seq(filmList(<h2><span id="pastFilms" class="clickable">Past Films<span class="tiny"> [Click]</span></span></h2>, _.isPast),
+             pastFilmsScript,
+             filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}),
+             filmList(<h2>Proposed Films</h2>, ! _.isScheduled),
+             newFilmForm),
+         sidebar = Some(defaultPageSidebar))
   }
 
   private def defaultPageSidebar = {
@@ -176,18 +174,18 @@ with Logging {
   get("/film/:id") {
     val id = params('id)
     val film = FilmDatabase.getFilm(id)
-    Template.page("Film Details",
-                  Seq(filmTitle(film.title),
-                      renameFilmScript(id),
-                      imdbForm(id, film),
-                      scheduleFilmForm(id, film.scheduledOption, film.isInCalendar),
-                      <div class="user">Added by {film.userNickname} on {film.created}.</div>,
-                      deleteFilmForm(id),
-                      <h2>Comments</h2>,
-                      comments(id, film.comments),
-                      addCommentForm(id)),
-                  sidebar = Some(defaultPageSidebar),
-                  scripts = List("jquery-ui-1.8.7.custom.min.js"))
+    page("Film Details",
+         Seq(filmTitle(film.title),
+             renameFilmScript(id),
+             imdbForm(id, film),
+             scheduleFilmForm(id, film.scheduledOption, film.isInCalendar),
+             <div class="user">Added by {film.userNickname} on {film.created}.</div>,
+             deleteFilmForm(id),
+             <h2>Comments</h2>,
+             comments(id, film.comments),
+             addCommentForm(id)),
+         sidebar = Some(defaultPageSidebar),
+         scripts = List("jquery-ui-1.8.7.custom.min.js"))
   }
 
   private def filmTitle(title: String) =
