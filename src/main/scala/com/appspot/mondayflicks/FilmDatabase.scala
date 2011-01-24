@@ -5,28 +5,17 @@ import util.DateOnly
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
-import javax.jdo.{JDOHelper, PersistenceManagerFactory, PersistenceManager}
+import javax.jdo.PersistenceManager
 
 import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
 
 
-object FilmDatabase {
-
-  private lazy val pmInstance = JDOHelper getPersistenceManagerFactory("transactions-optional")
+object FilmDatabase extends PersistenceManagerSupport {
 
   def allFilms: Seq[Film] =
     withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor, created").
                            execute.asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
-
-  private def withPersistenceManager[T](f: PersistenceManager => T): T = {
-    val pm = pmInstance.getPersistenceManager
-    try {
-      f(pm)
-    } finally {
-      pm.close
-    }
-  }
 
   def addFilm(title: String, user: User) {
     withPersistenceManager(_.makePersistent(Film(title, user)))

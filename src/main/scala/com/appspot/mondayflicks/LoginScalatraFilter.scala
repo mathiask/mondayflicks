@@ -44,7 +44,7 @@ with Style with UserSupport with util.Logging {
       <div><form action="/login/login" method="post">
         <input type="hidden" name="next" value={next}/>
         <div><div class="label">Email</div><input type="text" name="email"/>@capgemini.com</div>
-        <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" name="Log in"/></div>
+        <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" value="Log in"/></div>
       </form></div>
     </xml:group>)
   }
@@ -54,13 +54,34 @@ with Style with UserSupport with util.Logging {
   // 2. DB and all that...
   // 3. SSL?
   post("/login/login") {
-    session('user) = new User(params('email), "local")
-    redirect(params('next))
+    val email = params('email)
+    val password = params('pwd)
+    if (CGUserDatabase.checkPassword(email, password)) {
+      session('user) = new User(email, "local")
+      info("User " + email + " logged in.");
+      redirect(params('next))
+    } else {
+      warn("Wrong password for " + email)
+      // FIXME flash
+      redirect("/login")
+    }
   }
 
   get("/login/logout") {
     session.remove("user")
     page("Logout", <xml:group>You have been logged out.</xml:group>)
+  }
+
+  get("/login/admin/users") {
+    page("Manage Users", <form action="/login/admin/user" method="post">
+           <div><div class="label">Email</div><input type="text" name="email"/>@capgemini.com</div>
+           <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" value="Create"/></div>
+         </form>)
+  }
+
+  post("/login/admin/user") {
+    CGUserDatabase.addUser(params('email), params('pwd))
+    redirect("/login/admin/users")
   }
 
 }
