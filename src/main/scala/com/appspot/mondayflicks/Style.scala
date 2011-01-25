@@ -66,4 +66,11 @@ trait Style {
                                                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"), 
                                 Nil)
 
+  protected def appengineIcon =
+    <div class="appengine">
+      <a href="http://code.google.com/appengine/" target="_blank">
+        <img src="/static/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
+      </a>
+    </div>
+
 }

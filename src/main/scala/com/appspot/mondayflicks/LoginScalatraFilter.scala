@@ -5,7 +5,7 @@ import com.google.appengine.api.users._
 import scala.xml.NodeSeq
 
 class LoginScalatraFilter extends ScalatraFilter
-with Style with UserSupport with FlashMapSupport with util.Logging {
+with Style with Scripts with UserSupport with FlashMapSupport with util.Logging {
   private val startPage = "/flicks"
 
   def page(title: String, content: NodeSeq) = {
@@ -13,6 +13,7 @@ with Style with UserSupport with FlashMapSupport with util.Logging {
       <html>
         <head>
           <title>{ title }</title>
+          <script src="/static/jquery-1.4.4.min.js"></script>
           <style>{ style }</style>
           <style>div.label{{ width: 6em; font-style: italic; display: inline-block; }}</style>
         </head>
@@ -22,11 +23,7 @@ with Style with UserSupport with FlashMapSupport with util.Logging {
             { message }
             { content }
             <hr/>
-            <div class="appengine">
-              <a href="http://code.google.com/appengine/" target="_blank">
-                <img src="/static/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
-              </a>
-            </div>
+            { appengineIcon }
             <a href={startPage}>Back to overview</a>
           </div>
         </body>
@@ -58,29 +55,38 @@ with Style with UserSupport with FlashMapSupport with util.Logging {
       <h2>Custom</h2>
       <div><form action="/login/login" method="post">
         <input type="hidden" name="next" value={next}/>
-        <div><div class="label">Email</div><input type="text" name="email" value={ params.getOrElse("email", "") }/>@capgemini.com</div>
-        <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" value="Log in"/></div>
+        { loginControls("Log in") } 
       </form></div>
     </xml:group>)
   }
 
-  // TODO: SSL
+  private def loginControls(submitLabel: String) = 
+    <xml:group>
+      <div><div class="label">Email</div><input id="email" type="text" name="email" value={ params.getOrElse("email", "") }/>@capgemini.com</div>
+      <div><div class="label">Password</div><input type="password" name="pwd"/><input id="submit" type="submit" value={submitLabel} /></div>
+      { onClickNonBlankScript("#submit", "#email") }        
+    </xml:group>
+
   post("/login/login") {
-    val email = params('email)
-    // TODO: normalize email: append @capgemini.com if no @ present
-    val password = params('pwd)
-    if (CGUserDatabase.checkPassword(email, password)) {
+    val rawEmail = params('email).trim
+    val email = normalize(rawEmail)
+    if (CGUserDatabase.checkPassword(email, params('pwd).trim)) {
       session('user) = new User(email, "local")
       info("User " + email + " logged in.");
       redirect(params('next))
     } else {
       warn("Wrong password for " + email)
       flash("message") = "Wrong email or password"
-      redirect("/login?email=" + email)
+      redirect("/login?email=" + rawEmail)
     }
   }
 
-  // TODO: get("/login/change"), forward if not logged in
+  private def normalize(email: String) = {
+    val e = email.trim.toLowerCase
+    if (e contains "@") e else e + "@capgemini.com"
+  }
+
+  // TODO: get("/login/user/change"), forward if not logged in
   // TODO: add link to this page
 
   get("/login/logout") {
@@ -95,13 +101,12 @@ with Style with UserSupport with FlashMapSupport with util.Logging {
   get("/login/admin/users") {
     // TODO: delete, change password
     page("Manage Users", <form action="/login/admin/user" method="post">
-           <div><div class="label">Email</div><input type="text" name="email"/>@capgemini.com</div>
-           <div><div class="label">Password</div><input type="password" name="pwd"/><input type="submit" value="Create"/></div>
-         </form>)
+                           { loginControls("Create") } 
+                         </form>)
   }
 
   post("/login/admin/user") {
-    CGUserDatabase.persistUser(params('email), params('pwd))
+    CGUserDatabase.persistUser(normalize(params('email)), params('pwd).trim)
     redirect("/login/admin/users")
   }
 

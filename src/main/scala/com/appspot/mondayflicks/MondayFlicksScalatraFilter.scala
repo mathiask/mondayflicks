@@ -17,7 +17,6 @@ with Logging {
   private def page(title:String,
                    content:NodeSeq,
                    sidebar: Option[NodeSeq] = None,
-                   message:Option[Any] = None,
                    scripts:List[String] = Nil) = {
     val doc =
       <html>
@@ -36,13 +35,7 @@ with Logging {
             <h1>{ title }</h1>
             <div id="content">{ content }</div>
             <hr/>
-            { message.getOrElse("") }
-            { if (message.isDefined) <hr/> }
-            <div class="appengine">
-              <a href="http://code.google.com/appengine/" target="_blank">
-                <img src="/static/images/appengine-silver-120x30.gif" alt="Powered by Google App Engine" />
-              </a>
-            </div>
+            { appengineIcon }
             { if (isLoggedIn) <a href={logoutURL} class="login">Log out</a>
               else <xml:group>
                <a href={cgLoginURL} class="login">CG Log in</a>

@@ -41,6 +41,7 @@
   <filter-mapping>
     <filter-name>ensureLogin</filter-name>
     <url-pattern>/user/*</url-pattern>
+    <url-pattern>/login/user/*</url-pattern>
   </filter-mapping>
 
   <filter>
@@ -77,15 +78,6 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>Pages for users who are logged in</web-resource-name>
-      <url-pattern>/google/*</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>*</role-name>
-    </auth-constraint>
-  </security-constraint>
-  <security-constraint>
-    <web-resource-collection>
       <web-resource-name>Admin pages</web-resource-name>
       <url-pattern>/admin/*</url-pattern>
       <url-pattern>/login/admin/*</url-pattern>
@@ -93,6 +85,17 @@
     <auth-constraint>
       <role-name>admin</role-name>
     </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>HTTPS pages</web-resource-name>
+      <url-pattern>/login</url-pattern>
+      <url-pattern>/login/*</url-pattern>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
   </security-constraint>
 
 </web-app>
