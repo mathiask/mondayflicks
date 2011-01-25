@@ -63,7 +63,8 @@ with Style with Scripts with UserSupport with FlashMapSupport with util.Logging 
   private def loginControls(submitLabel: String) = 
     <xml:group>
       <div><div class="label">Email</div><input id="email" type="text" name="email" value={ params.getOrElse("email", "") }/>@capgemini.com</div>
-      <div><div class="label">Password</div><input type="password" name="pwd"/><input id="submit" type="submit" value={submitLabel} /></div>
+      <div><div class="label">Password</div><input type="password" name="pwd"/></div>
+      <div> <input id="submit" type="submit" value={submitLabel} /></div>
       { onClickNonBlankScript("#submit", "#email") }        
     </xml:group>
 
@@ -99,15 +100,45 @@ with Style with Scripts with UserSupport with FlashMapSupport with util.Logging 
   }
 
   get("/login/admin/users") {
-    // TODO: delete, change password
-    page("Manage Users", <form action="/login/admin/user" method="post">
-                           { loginControls("Create") } 
-                         </form>)
+    val users = CGUserDatabase.allUsers
+    page("Manage Users", 
+         <xml:group>
+           <h2>Create or change user</h2>
+           <form action="/login/admin/user" method="post">
+           { loginControls("Create/Update") } 
+           </form>
+           <h2>All Users</h2>
+           <div id="users">
+             { for (user <- users) yield 
+                 <div>
+                   <form action="/login/admin/delete" method="post" class="inline">
+                     <input type="hidden" name="email" value={user.email}/>
+                     <input type="submit" value="Delete" onclick="return confirm('Please confirm!');"/>
+                   </form>
+                   <a href="#">{user.email}</a>
+                 </div> }
+           </div>
+           { copyEmailScript }
+         </xml:group>)
   }
 
+  private def copyEmailScript =
+    <script><xml:unparsed>
+      $(function(){
+        $("#users a").click(function(){ 
+          $("#email").val($(this).text().replace(/@capgemini.com$/, "")); 
+        });
+      });
+    </xml:unparsed></script>
+
   post("/login/admin/user") {
-    CGUserDatabase.persistUser(normalize(params('email)), params('pwd).trim)
+    CGUserDatabase.persist(normalize(params('email)), params('pwd).trim)
     redirect("/login/admin/users")
+  }
+
+  post("/login/admin/delete") {
+    CGUserDatabase.delete(params('email).trim)
+    redirect("/login/admin/users")    
   }
 
 }

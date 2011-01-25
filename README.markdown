@@ -7,6 +7,7 @@ Technology Stack
 ----------------
 * Google [AppEngine](http://code.google.com/appengine/docs/java/overview.html)
   * using Google account based user service
+  * plus custom log in
 * [Scala](http://www.scala-lang.org/)
   * using plain [JDO](http://code.google.com/appengine/docs/java/datastore/usingjdo.html)
   * and a minimal trait wrapper around JDK logging
@@ -20,6 +21,4 @@ Technology Stack
 
 TODOs
 -----
-* Atom feeds
-  * DIY
-  * using Twitter's feeds?
+* DIY Atom feeds

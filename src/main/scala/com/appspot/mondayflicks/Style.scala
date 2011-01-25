@@ -41,6 +41,7 @@ trait Style {
     |  width: 40em; margin-bottom: 2ex;
     |}
     |input.delete { float: right; }
+    |form.inline { display: inline; }
     |div.sidebar {
     |  float: right;
     |  margin: 1ex;
