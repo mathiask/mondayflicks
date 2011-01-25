@@ -87,11 +87,32 @@ with Style with Scripts with UserSupport with FlashMapSupport with util.Logging 
     if (e contains "@") e else e + "@capgemini.com"
   }
 
-  // TODO: get("/login/user/change"), forward if not logged in
-  // TODO: add link to this page
+  get("/login/user/change") {
+    if (!isCustomLoggedIn) {
+      warn("Cannot change password for Google log in.")
+      redirect(startPage)
+    }
+    else passwordChangePage
+  }
+
+  private def passwordChangePage = {
+    val next = params.getOrElse("next", startPage)
+    page("Change Password",
+         <form action="/login/user/change" method="post">
+           <input type="hidden" name="next" value={next}/>
+           <div>New password <input id="pwd" type="password" name="pwd"/></div>
+           <div> <input id="submit" type="submit" value="Change"/></div>
+           { onClickMinLengthScript("#submit", "#pwd", 6, "Password must be at least six characters long.") }
+         </form>)
+  }
+
+  post("/login/user/change") {
+    CGUserDatabase.persist(currentUser.getEmail, params('pwd).trim)
+    redirect(params('next))
+  }
 
   get("/login/logout") {
-    session.remove("user")
+    session.invalidate
     page("Logout", <xml:group>You have been logged out.</xml:group>)
   }
 

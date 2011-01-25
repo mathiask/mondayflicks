@@ -44,11 +44,36 @@ trait Scripts {
     </xml:unparsed></script>
   }
 
-  /** Add an onclick handler to a control cheking that an input widget is non blank. */
-  protected def onClickNonBlankScript(controlSelector:String , inputSelector: String) =
+  /**
+   * Add an onclick handler to a control cheking that an input widget's value
+   * is non blank.
+   */
+  protected def onClickNonBlankScript(controlSelector:String , inputSelector: String) = 
+     <script>
+       $(function(){{
+-        $('{controlSelector}').click(function(){{return $.trim($('{inputSelector}').val()) !== ''; }});
+       }});
+     </script>
+
+  /**
+   * Add an onclick handler to a control cheking that an input widget's value
+   * has a minimal length.
+   */
+  protected def onClickMinLengthScript(controlSelector:String , 
+                                       inputSelector: String, 
+                                       minLength: Int, 
+                                       warnText: String) =
     <script>
       $(function(){{
-        $('{controlSelector}').click(function(){{return $.trim($('{inputSelector}').val()) !== ''; }});
+        var minLength = { minLength },
+            inputSelector = '{ inputSelector }';
+        $('{controlSelector}').click(function(){{
+        <xml:unparsed>
+          var ok = $.trim($(inputSelector).val()).length >= minLength; 
+        </xml:unparsed>
+          if (!ok) alert('{warnText}');
+          return ok;
+        }});
       }});
     </script>
 
