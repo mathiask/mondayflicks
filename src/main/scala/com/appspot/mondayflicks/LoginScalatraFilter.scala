@@ -1,11 +1,12 @@
 package com.appspot.mondayflicks
 
+import util._
 import org.scalatra.{ScalatraFilter, FlashMapSupport}
 import com.google.appengine.api.users._
 import scala.xml.NodeSeq
 
 class LoginScalatraFilter extends ScalatraFilter
-with Style with Scripts with UserSupport with FlashMapSupport with util.Logging {
+with Style with Scripts with UserSupport with SerializableFlashMapSupport with Logging {
   private val startPage = "/flicks"
 
   def page(title: String, content: NodeSeq) = {
@@ -47,7 +48,7 @@ with Style with Scripts with UserSupport with FlashMapSupport with util.Logging 
   }
 
   get("/login") {
-    val next = params.getOrElse("next", startPage)
+    val next = params.getOrElse('next, startPage)
     page("Login",
     <xml:group>
       <h2>Google</h2>
@@ -62,7 +63,7 @@ with Style with Scripts with UserSupport with FlashMapSupport with util.Logging 
 
   private def loginControls(submitLabel: String) = 
     <xml:group>
-      <div><div class="label">Email</div><input id="email" type="text" name="email" value={ params.getOrElse("email", "") }/>@capgemini.com</div>
+      <div><div class="label">Email</div><input id="email" type="text" name="email" value={ params.getOrElse('email, "") }/>@capgemini.com</div>
       <div><div class="label">Password</div><input type="password" name="pwd"/></div>
       <div> <input id="submit" type="submit" value={submitLabel} /></div>
       { onClickNonBlankScript("#submit", "#email") }        
@@ -96,7 +97,7 @@ with Style with Scripts with UserSupport with FlashMapSupport with util.Logging 
   }
 
   private def passwordChangePage = {
-    val next = params.getOrElse("next", startPage)
+    val next = params.getOrElse('next, startPage)
     page("Change Password",
          <form action="/login/user/change" method="post">
            <input type="hidden" name="next" value={next}/>

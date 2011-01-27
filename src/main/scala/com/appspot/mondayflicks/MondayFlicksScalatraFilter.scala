@@ -289,13 +289,13 @@ with Logging {
 
   post("/user/film/:id") {
     val id = params('id)
-    FilmDatabase.updateFilm(id, params("imdb"))
+    FilmDatabase.updateFilm(id, params('imdb))
     redirect("/film/" + id)
   }
 
   post("/user/film/:id/comment") {
     val id = params('id)
-    FilmDatabase.addCommentToFilm(id, params("comment"), currentUser)
+    FilmDatabase.addCommentToFilm(id, params('comment), currentUser)
     val film = FilmDatabase.getFilm(id)
     tweet("Comment for " + filmURL(film) + " " + film.title)
     redirect("/film/" + id)
