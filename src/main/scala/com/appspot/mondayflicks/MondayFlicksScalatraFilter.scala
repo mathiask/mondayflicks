@@ -39,6 +39,7 @@ with Logging {
             { if (isLoggedIn) <xml:group>
                 <a href={logoutURL} class="login">Log out</a>
                 { if (isCustomLoggedIn) <a href={cgChangePasswordURL} class="login">Change password</a> }
+                { if (isAdmin) <a href="/login/admin/users" class="login">Admin</a> }
               </xml:group>
               else <xml:group>
                 <a href={cgLoginURL} class="login">CG Log in</a>
