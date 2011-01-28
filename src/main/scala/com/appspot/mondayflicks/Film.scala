@@ -12,8 +12,12 @@ import javax.jdo.annotations._
 import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
 
+trait NonEmailNichname {
+  def nonEmailNickname(user: User) = user.getNickname.takeWhile(_ != '@')
+}
+
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
-class Film {
+class Film extends NonEmailNichname {
 
   import Film.imdbURL
 
@@ -22,7 +26,7 @@ class Film {
   var key: Key = _
   @Persistent var title: String = _
   @Persistent private var imdbId: String = _
-  @Persistent var user: User = _
+  @Persistent private var user: User = _
   @Persistent var created: Date = _
   @Persistent private var scheduledFor: Date = _
   @Persistent
@@ -44,7 +48,7 @@ class Film {
   def imdbLinkOrSearch  = if (imdbId == null) imdbURL + "/find?s=all&q=" + title else imdbLinkForId
   def hasImdbLink = imdbId != null
 
-  def userNickname = user.getNickname
+  def userNickname = nonEmailNickname(user)
 
   def comments: List[FilmComment]  = commentList.toList
   def add(comment: FilmComment) = commentList.add(comment)
@@ -79,7 +83,7 @@ object Film {
 
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
-class FilmComment {
+class FilmComment extends NonEmailNichname {
   @PrimaryKey
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _
@@ -88,7 +92,7 @@ class FilmComment {
   @Persistent var created: Date = _
   @Persistent var text: String = _
 
-  def userNickname = user.getNickname
+  def userNickname = nonEmailNickname(user)
   def keyString = KeyFactory.keyToString(key)
 }
 
