@@ -10,7 +10,7 @@ trait Logging {
 
   protected def loggerName = getClass.getName
 
-  def error(thrown: Throwable, msg: String = "") =
+  def severe(thrown: Throwable, msg: String = "") =
     logger.logp(SEVERE, null, null, msg, thrown)
   def warn(msg: => Any) = if (logger isLoggable WARNING) log(WARNING, msg)
   def info(msg: => Any) = if (logger isLoggable INFO) log(INFO, msg)

@@ -49,7 +49,7 @@ extends Logging with Tweeter {
     request.headers.authorization = oauthParams.getAuthorizationHeader
     try request.execute
     catch { // don't fail because of Twitter
-      case e => error(e)
+      case e => severe(e)
     }
   }
 

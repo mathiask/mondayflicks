@@ -71,7 +71,7 @@ with Logging {
              <div class="error">The film or comment does not (or no longer) exists.</div>
              <div><a href={startPage}>Restart</a></div>)
       case t =>
-        error(t)
+        severe(t)
         page("Error",
              <div class="error">Internal server error.</div>
              <div><a href={startPage}>Restart</a></div>)

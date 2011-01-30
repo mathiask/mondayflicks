@@ -26,7 +26,7 @@ class Film extends NonEmailNichname {
   var key: Key = _
   @Persistent var title: String = _
   @Persistent private var imdbId: String = _
-  @Persistent private var user: User = _
+  @Persistent var user: User = _
   @Persistent var created: Date = _
   @Persistent private var scheduledFor: Date = _
   @Persistent

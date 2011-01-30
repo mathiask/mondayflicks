@@ -22,3 +22,5 @@ Technology Stack
 TODOs
 -----
 * DIY Atom feeds
+* Downtime page
+* Message of the day

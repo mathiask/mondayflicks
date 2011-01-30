@@ -41,7 +41,7 @@ with Style with Scripts with UserSupport with SerializableFlashMapSupport with L
   }
 
   error {
-    error(caughtThrowable)
+    severe(caughtThrowable)
     page("Error",
          <div class="error">Internal server error.</div>
          <div><a href={startPage}>Restart</a></div>)

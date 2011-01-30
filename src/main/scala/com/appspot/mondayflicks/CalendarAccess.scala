@@ -48,7 +48,7 @@ with Logging with CalendarAccess {
     debug("... with id " + event.id)
     event.id
   } catch { // don't fail because of calendar
-    case e => error(e); null
+    case e => severe(e); null
   }
 
   def create(title: String) = {
@@ -63,7 +63,7 @@ with Logging with CalendarAccess {
     if (id == null) return
     try deleteFollowingRedirect(urlFor(id))
     catch { // don't fail because of calendar
-      case e => error(e)
+      case e => severe(e)
     }
   }
 
@@ -80,7 +80,7 @@ with Logging with CalendarAccess {
     event.setStartAndEnd(film.scheduled)
     put(event)
   } catch { // don't fail because of calendar
-    case e => error(e)
+    case e => severe(e)
   }
 
   private def readEvent(id :String) =
@@ -97,7 +97,7 @@ with Logging with CalendarAccess {
     content.data = event
     putFollowingRedirect(jasonUrlFor(event.id), content)
   } catch { // don't fail because of calendar
-    case e => error(e)
+    case e => severe(e)
   }
 
   def rename(film: Film) = syncNameAndDate(film)
