@@ -1,8 +1,13 @@
 package com.appspot.mondayflicks
 
 import javax.jdo.annotations._
+import net.sf.jsr107cache.{Cache, CacheManager}
 
 object KeyValueStore extends PersistenceManagerSupport[KeyValuePair] {
+
+  private lazy val cache: Cache = 
+    CacheManager.getInstance.getCacheFactory.createCache(java.util.Collections.emptyMap[String, String])
+
   def readOrElse(key: String, default: String): String =
     withEntity(key) {
       case Some(pair) => pair.value
