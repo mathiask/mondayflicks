@@ -79,6 +79,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Admin pages</web-resource-name>
+      <url-pattern>/admin</url-pattern>
       <url-pattern>/admin/*</url-pattern>
       <url-pattern>/login/admin/*</url-pattern>
     </web-resource-collection>

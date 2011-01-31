@@ -31,6 +31,7 @@ with Logging {
         </head>
         <body>
           <div id="main">
+            { motd }
             { if (sidebar.isDefined) <div class="sidebar">{ sidebar.get }</div> }
             <h1>{ title }</h1>
             <div id="content">{ content }</div>
@@ -39,7 +40,7 @@ with Logging {
             { if (isLoggedIn) <xml:group>
                 <a href={logoutURL} class="login">Log out</a>
                 { if (isCustomLoggedIn) <a href={cgChangePasswordURL} class="login">Change password</a> }
-                { if (isAdmin) <a href="/login/admin/users" class="login">Admin</a> }
+                { if (isAdmin) <a href="/admin" class="login">Admin</a> }
               </xml:group>
               else <xml:group>
                 <a href={cgLoginURL} class="login">CG Log in</a>
@@ -52,6 +53,33 @@ with Logging {
       </html>
     contentType = "text/html"
     asXHTMLWithDocType(doc)
+  }
+
+  private def motd =
+    if (!session.get('MOTDseen).isDefined)
+      <xml:group>
+        { motdDiv }
+        { motdScript }
+      </xml:group>
+
+  private def motdDiv =
+    <div id="motd" class="motd">
+      <span class="tiny"><img id="close_motd" src="/static/images/close.png" class="inline clickable"/> Message of the Day: </span>
+      { Unparsed(KeyValueStore.readOrElse("motd", "Have <em>fun</em>!")) }
+    </div>
+
+  private def motdScript = <xml:unparsed>
+    <script>
+      $(function(){ $("#close_motd").click(function(){ 
+        $("#motd").fadeOut(); 
+        $.post("/motd/seen")
+      }); });
+    </script>
+  </xml:unparsed>
+
+  post("/motd/seen") {
+    debug("MOTD seen")
+    session('MOTDseen) = "yes"
   }
 
   private val startPage = "/flicks"
@@ -351,4 +379,19 @@ with Logging {
     } else film.calendarId = calendar.create(film)
   }
 
+  get("/admin") {
+    val motd = KeyValueStore.readOrElse("motd", "")
+    page("Film Details", <xml:group>
+         <form action="/admin/motd" method="post">
+           MOTD: <input type="text" name="motd" value={motd}/>
+           <input type="submit" value="Set"/>
+         </form>
+         <a href="/login/admin/users">User administration</a>
+      </xml:group>)
+  }
+
+  post("/admin/motd") {
+    KeyValueStore.set("motd", params('motd))
+    redirect("/admin")
+  }
 }

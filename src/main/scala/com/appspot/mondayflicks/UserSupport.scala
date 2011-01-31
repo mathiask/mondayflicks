@@ -23,6 +23,5 @@ trait UserSupport extends LoggedIn {
 
   protected def cgChangePasswordURL = "/login/user/change?next=" + thisURL
   
-
   private def thisURL = request.getRequestURI
 }

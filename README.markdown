@@ -21,6 +21,5 @@ Technology Stack
 
 TODOs
 -----
+* Use memcache
 * DIY Atom feeds
-* Downtime page
-* Message of the day

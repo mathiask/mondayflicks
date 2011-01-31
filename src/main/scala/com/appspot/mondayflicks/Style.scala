@@ -51,6 +51,15 @@ trait Style {
     |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
     |  width: 33%;
     |}
+    |div.motd {
+    |  margin: 0px 1ex 1ex 0px;
+    |  padding: 1ex;
+    |  background-color: #9CDEFF;
+    |  border: 1px solid #005580;
+    |  border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
+    |}
+    |img.inline { vertical-align: text-bottom; }
+    |.clickable { cursor: crosshair; }
     |div.popup { position: absolute; top: 2ex; left: -1.5em; display: none; z-index: 1; }
     |div.error { font-size: large; color: red; }
     |img.icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5em;}

@@ -11,7 +11,7 @@ import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
 
 
-object FilmDatabase extends PersistenceManagerSupport {
+object FilmDatabase extends PersistenceManagerSupport[Film] {
 
   def allFilms: Seq[Film] =
     withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor, created").

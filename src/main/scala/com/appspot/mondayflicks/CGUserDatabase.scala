@@ -5,33 +5,20 @@ import scala.collection.JavaConversions._
 import java.security.{MessageDigest, SecureRandom}
 
 import javax.jdo.annotations._
-import javax.jdo.{JDOObjectNotFoundException, PersistenceManager}
 
 import com.google.api.client.util.Base64.{encode => base64}
 
 /** I am responsible for the custom log in. */
-object CGUserDatabase extends PersistenceManagerSupport {
+object CGUserDatabase extends PersistenceManagerSupport[CGUser] {
 
   def persist(email: String, password: String) = 
-    withUser(email) {
+    withEntity(email) {
       case Some(user) => user.passwordShaBase64 = user.sha1Base64(password)
       case None => withPersistenceManager(_.makePersistent(CGUser(email, password)))
     }
 
-  def withUser[T](email: String)(f: Option[CGUser] => T): T = { 
-    withPersistenceManager{ pm =>
-      try f(Some(doGetUser(pm, email)))
-      catch {
-        case _: JDOObjectNotFoundException => f(None)
-      }
-    }
-  }
-
-  private def doGetUser(pm: PersistenceManager, email: String) =
-    pm.getObjectById(classOf[CGUser], email).asInstanceOf[CGUser]
-
   def checkPassword(email: String, password: String): Boolean = 
-    withUser(email) {
+    withEntity(email) {
       case Some(user) => user.passwordShaBase64 == user.sha1Base64(password)
       case None => false
     }
@@ -44,7 +31,7 @@ object CGUserDatabase extends PersistenceManagerSupport {
       .map(pm.detachCopy(_)))
 
   def delete(email: String) {
-    withPersistenceManager(pm => pm.deletePersistent(doGetUser(pm, email)))
+    withPersistenceManager(pm => pm.deletePersistent(getEntity(pm, email)))
   }
 
 }
