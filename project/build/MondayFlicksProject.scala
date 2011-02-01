@@ -9,8 +9,6 @@ class MondayFlicksProject(info: ProjectInfo) extends AppengineProject(info) with
   val scalatraTest = "org.scalatra" %% "scalatra-scalatest" % scalatraVersion % "test"
   val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
 
-  val jsr107 = Jsr107cacheJars
-
   val sonatypeNexusSnapshots = "Sonatype Nexus Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 }
