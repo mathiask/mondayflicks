@@ -21,5 +21,4 @@ Technology Stack
 
 TODOs
 -----
-* Use memcache
 * DIY Atom feeds
