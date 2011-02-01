@@ -34,6 +34,10 @@
   </context-param>
   -->
 
+  <session-config> 
+    <session-timeout>60</session-timeout>   <!-- minutes of inactivity --> 
+  </session-config> 
+
   <filter>
     <filter-name>ensureLogin</filter-name>
     <filter-class>com.appspot.mondayflicks.EnsureLoginFilter</filter-class>
