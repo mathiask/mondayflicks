@@ -386,7 +386,8 @@ with Logging {
            MOTD: <input type="text" name="motd" value={motd}/>
            <input type="submit" value="Set"/>
          </form>
-         <a href="/login/admin/users">User administration</a>
+         <div><a href="/login/admin/users">User administration</a></div>
+         <div><a href="/admin/cache/stats">Memcache statistics</a></div>
       </xml:group>)
   }
 
@@ -394,4 +395,15 @@ with Logging {
     KeyValueStore.set("motd", params('motd))
     redirect("/admin")
   }
+
+  get("/admin/cache/stats") {
+    val stats = KeyValueStore.stats
+    page("Memcache Statistics",
+         <table>
+           <tr><th>Items</th><td>{stats.getItemCount}</td></tr>
+           <tr><th>Hits:misses</th><td>{stats.getHitCount}:{stats.getMissCount}</td></tr>
+           <tr><th>Idle seconds</th><td>{stats.getMaxTimeWithoutAccess}</td></tr>
+         </table>)
+  }
+
 }

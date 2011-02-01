@@ -60,6 +60,7 @@ trait Style {
     |}
     |img.inline { vertical-align: text-bottom; }
     |.clickable { cursor: crosshair; }
+    |th {text-align: right; padding-right: 1em; }
     |div.popup { position: absolute; top: 2ex; left: -1.5em; display: none; z-index: 1; }
     |div.error { font-size: large; color: red; }
     |img.icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5em;}

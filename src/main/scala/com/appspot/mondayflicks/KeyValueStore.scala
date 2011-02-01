@@ -32,6 +32,8 @@ object KeyValueStore extends PersistenceManagerSupport[KeyValuePair] with util.L
     }
     cache.put(key, value)
   }
+
+  def stats = cache.getStatistics
 }
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
