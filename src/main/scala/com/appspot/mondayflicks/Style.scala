@@ -69,7 +69,7 @@ trait Style {
 
   def asXHTMLWithDocType(doc: Node): String = {
       val writer = new StringWriter
-      XML.write(writer, doc, "UTF-8", true, doctype)
+      XML.write(writer, doc, "UTF-8", false, doctype)
       writer.toString
   }
 
