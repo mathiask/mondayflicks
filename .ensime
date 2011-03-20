@@ -1,0 +1,10 @@
+;; This config was generated using ensime-config-gen. Feel free to customize its contents manually.
+
+(
+
+:project-package "com.appspot.mondayflicks"
+
+:use-sbt t
+
+:compile-jars ("c:/cygwin/home/mkegel/lib/appengine-java-sdk-1.4.0/lib/user" "c:/cygwin/home/mkegel/lib/appengine-java-sdk-1.4.0/lib/tools/orm")
+)
