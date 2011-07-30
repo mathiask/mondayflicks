@@ -6,7 +6,7 @@ import com.google.appengine.api.users._
 import scala.xml.NodeSeq
 
 class LoginScalatraFilter extends ScalatraFilter
-with Style with Scripts with UserSupport with SerializableFlashMapSupport with Logging {
+with Style with Scripts with UserSupport with FlashMapSupport with Logging {
   private val startPage = "/flicks"
 
   def page(title: String, content: NodeSeq) = {

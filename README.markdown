@@ -21,7 +21,6 @@ Technology Stack
 
 TODOs
 -----
-* Improve tweet for film creation
 * Doodle integration
 * DIY Atom feeds
 * Move to current google-api-client
