@@ -191,8 +191,9 @@ with Logging {
     else <span/>
 
   post("/user/film") {
-    FilmDatabase.addFilm(params('film), currentUser)
-    tweet("New film created " + startURL)
+    val title = params('film)
+    FilmDatabase.addFilm(title, currentUser)
+    tweet("New film '" + title + "' created. " + startURL)
     redirect(startPage)
   }
 
