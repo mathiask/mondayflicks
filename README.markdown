@@ -21,6 +21,6 @@ Technology Stack
 
 TODOs
 -----
-* Doodle integration
 * DIY Atom feeds
 * Move to current google-api-client
+* Deeper (OAuth) Doodle integration?
