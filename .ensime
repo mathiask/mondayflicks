@@ -6,5 +6,5 @@
 
 :use-sbt t
 
-:compile-jars ("/home/mathias/lib/appengine-java-sdk-1.4.0/lib/user" "/home/mkegel/lib/appengine-java-sdk-1.4.0/lib/tools/orm")
+:compile-jars ("/home/mathias/lib/appengine-java-sdk-1.5.2/lib/user" "/home/mkegel/lib/appengine-java-sdk-1.5.2/lib/tools/orm")
 )
