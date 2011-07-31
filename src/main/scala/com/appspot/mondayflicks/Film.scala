@@ -1,6 +1,6 @@
 package com.appspot.mondayflicks
 
-import util.DateOnly
+import util.{DateOnly, NonEmailNickname}
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -12,12 +12,8 @@ import javax.jdo.annotations._
 import com.google.appengine.api.datastore.{Key, KeyFactory}
 import com.google.appengine.api.users.User
 
-trait NonEmailNichname {
-  def nonEmailNickname(user: User) = user.getNickname.takeWhile(_ != '@')
-}
-
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
-class Film extends NonEmailNichname {
+class Film extends NonEmailNickname {
 
   import Film.imdbURL
 
@@ -83,7 +79,7 @@ object Film {
 
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
-class FilmComment extends NonEmailNichname {
+class FilmComment extends NonEmailNickname {
   @PrimaryKey
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var key: Key = _

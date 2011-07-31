@@ -5,12 +5,13 @@ import util._
 import scala.xml._
 import org.scalatra._
 
+import java.net.URLEncoder
 import javax.servlet.FilterConfig
 
 import com.google.appengine.api.users.User
 
 class MondayFlicksScalatraFilter extends ScalatraFilter
-with Style with Scripts with UserSupport
+with Style with Scripts with UserSupport with NonEmailNickname
 with CalendarAccessSupport with TweeterSupport
 with Logging {
 
@@ -112,11 +113,15 @@ with Logging {
   }
 
   get(startPage) {
+    val allFilms = FilmDatabase.allFilms
+    val proposedFilms = allFilms filter {! _.isScheduled}
     page("Monday Flicks",
-         Seq(filmList(<h2><span id="pastFilms" class="clickable">Past Films<span class="tiny"> [Click]</span></span></h2>, _.isPast),
+         Seq(filmList(<h2><span id="pastFilms" class="clickable">Past Films<span class="tiny"> [Click]</span></span></h2>,
+                      allFilms filter {_.isPast}),
              pastFilmsScript,
-             filmList(<h2>Scheduled Films</h2>, {f => f.isScheduled && !f.isPast}),
-             filmList(<h2>Proposed Films</h2>, ! _.isScheduled),
+             filmList(<h2>Scheduled Films</h2>, allFilms filter {f => f.isScheduled && !f.isPast}),
+             filmList(<h2>Proposed Films</h2>, proposedFilms),
+             if (proposedFilms.nonEmpty && isLoggedIn) doodleButton else <!-- nothing to doodle -->,
              newFilmForm),
          sidebar = Some(defaultPageSidebar))
   }
@@ -132,9 +137,10 @@ with Logging {
       <hr/>
       <h3>Film Lists</h3>
       <div><a target="_blank" href={Film.imdbURL + "/chart/top"}>IMDb Top 250</a></div>
-      <div><a target="_blank" href="http://en.wikipedia.org/wiki/1001_Movies_You_Must_See_Before_You_Die#25_Movies_You_Must_See_Before_You_Die">25
+      <div><a target="_blank"
+              title="25 Movies You Must See Before You Die"
+              href="http://en.wikipedia.org/wiki/1001_Movies_You_Must_See_Before_You_Die#25_Movies_You_Must_See_Before_You_Die">25
         Movies You Must See...</a></div>
-      <div>...</div>
   }
 
   private def calendarPopup = <div class="popup" id="calendarPopup">
@@ -148,8 +154,7 @@ with Logging {
       {popupScript("twitterPopup")}
     </div>
 
-  private def filmList(title: NodeSeq, filmPredicate: Film => Boolean) = {
-    val films = FilmDatabase.allFilms filter filmPredicate
+  private def filmList(title: NodeSeq, films: Seq[Film]) = {
     if (films.nonEmpty)
       <div>
         { title }
@@ -180,6 +185,11 @@ with Logging {
       });
     </xml:unparsed></script>
 
+  private def doodleButton =
+    <form action="/user/doodle" method="GET">
+      <input type="submit" class="flushleft" value="Create Doodle"/>
+    </form>
+
   private def newFilmForm =
     if (isLoggedIn)
       <form action="/user/film" method="POST">
@@ -189,6 +199,38 @@ with Logging {
         { onClickNonBlankScript("#new", "#film") }
       </form>
     else <span/>
+
+  get("/user/doodle") { 
+    val films = FilmDatabase.allFilms filter {! _.isScheduled}
+    page("Create Doodle",
+         <form action="/user/doodle" method="POST">
+           { 
+             for (film <- films) yield <div>
+               <input type="checkbox" name="film" value={film.id.toString} checked="checked"/> { film.title }
+             </div>
+           }
+           <input type="submit" class="flushleft" value="Create"/>
+         </form>)
+  }
+
+  post("/user/doodle") {
+    val films = multiParams("film").map(FilmDatabase.getFilm _) 
+    redirect(if (films.isEmpty) startPage else doodleWizardUrl(films))
+  }
+
+  private def doodleWizardUrl(films: Seq[Film]) = { 
+    "http://www.doodle.com/polls/wizard.html?" +
+    "type=text" +
+    "&levels=3" +
+    "&title=Monday+Flicks+Film+Poll" +
+    "&name=" + urlEncode(nonEmailNickname(currentUser)) +
+    "&eMailAddress=" + currentUser.getNickname +
+    films.zipWithIndex.map{ case (f,i) => 
+      "option" + (i+1) + "=" + urlEncode(f.title + " " + f.imdbLink)
+    }.mkString("&", "&", "")
+  }
+
+  private def urlEncode(string: String) = URLEncoder.encode(string, "UTF-8")
 
   post("/user/film") {
     val title = params('film)
