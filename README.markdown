@@ -19,8 +19,12 @@ Technology Stack
   * also using [google-api-java-client](http://code.google.com/p/google-api-java-client/)
     with some extras
 
+FIXME
+-----
+* Calendar integration
+
 TODOs
 -----
-* Doodle integration
 * DIY Atom feeds
 * Move to current google-api-client
+* Deeper (OAuth) Doodle integration?

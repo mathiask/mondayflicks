@@ -4,4 +4,7 @@
     <property name="scheduledFor" direction="asc"/>
     <property name="created" direction="asc"/>
   </datastore-index>
+  <datastore-index kind="FilmComment" ancestor="true" source="auto">
+    <property name="created" direction="asc"/>
+  </datastore-index>
 </datastore-indexes>
