@@ -44,8 +44,8 @@ with Logging {
                 { if (isAdmin) <a href="/admin" class="login">Admin</a> }
               </xml:group>
               else <xml:group>
-                <a href={cgLoginURL} class="login">CG Log in</a>
-                <a href={loginURL} class="login">Google Log in</a>
+                <a href={cgLoginURL} class="login">Custom Log In</a>
+                <a href={loginURL} class="login">Google Log In</a>
               </xml:group>
             }
             <a href={startPage}>Overview</a>
@@ -424,7 +424,7 @@ with Logging {
 
   get("/admin") {
     val motd = KeyValueStore.readOrElse("motd", "")
-    page("Film Details", <xml:group>
+    page("Monday Flicks Administration", <xml:group>
          <form action="/admin/motd" method="post">
            MOTD: <input type="text" name="motd" value={motd}/>
            <input type="submit" value="Set"/>
