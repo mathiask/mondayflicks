@@ -1,8 +1,9 @@
 package com.appspot.mondayflicks
 
 import util._
-
+import scala.collection.JavaConversions._
 import org.scalatra._
+import com.google.appengine.api.appidentity.AppIdentityServiceFactory
 
 /**
  * I contain test functions for authentication.
@@ -17,6 +18,10 @@ with CalendarAccessSupport with TweeterSupport with UserSupport with Logging {
       request.getUserPrincipal + ", admin: " + isAdmin + " / " + user.getNickname + "(" + user.getEmail + ")"
     debug("Principal: " + principal)
     principal
+  }
+
+  get("/admin/cal/test") {
+    AppIdentityServiceFactory.getAppIdentityService.getAccessToken(List("https://www.googleapis.com/auth/calendar")).getAccessToken
   }
 
   get("/admin/cal/private") {

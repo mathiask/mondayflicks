@@ -7,15 +7,6 @@
   <display-name>Monday Flicks</display-name>
 
   <context-param>
-    <param-name>calendar-token</param-name>
-    <param-value>1/e7FaaUnBHxPftlwypToVO9ZiCZPhH1dTIleVdRQyOao</param-value>
-  </context-param>
-  <context-param>
-    <param-name>calendar-token-secret</param-name>
-    <param-value>Brlp7y3qSgZen0Ku/bVePHPL</param-value>
-  </context-param>
-
-  <context-param>
     <param-name>twitter-consumer-key</param-name>
     <param-value>VyP9BfSuvsaGgqb5XYQoQ</param-value>
   </context-param>

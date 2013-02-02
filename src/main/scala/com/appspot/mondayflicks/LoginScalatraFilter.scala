@@ -49,7 +49,7 @@ with Style with Scripts with UserSupport with FlashMapSupport with Logging {
 
   get("/login") {
     val next = params.getOrElse('next, startPage)
-    page("Login",
+    page("Log In",
     <xml:group>
       <h2>Google</h2>
       <div><a href={loginURL(next)}>Log in with Google account</a></div>
@@ -63,7 +63,12 @@ with Style with Scripts with UserSupport with FlashMapSupport with Logging {
 
   private def loginControls(submitLabel: String) = {
     <xml:group>
-      <div><div class="label">Email</div><input id="email" type="text" name="email" value={ params.getOrElse('email, "") }/>@capgemini.com</div>
+      <div><div class="label">Email</div><input
+          id="email"
+          type="text"
+          name="email" value={ params.getOrElse('email, "") }
+          title='"@capgemini.com" is added when no "@" is entered'/>
+      </div>
       <div><div class="label">Password</div><input type="password" name="pwd"/></div>
       <div> <input id="submit" type="submit" value={submitLabel} /></div>
       { onClickNonBlankScript("#submit", "#email") }

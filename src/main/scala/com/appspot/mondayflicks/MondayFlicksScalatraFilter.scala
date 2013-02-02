@@ -24,6 +24,7 @@ with Logging {
         <head>
           <title>{ title }</title>
           <style>{ style }</style>
+          <link href="http://fonts.googleapis.com/css?family=Tangerine:700" type="text/css" rel="stylesheet" />
           <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
           <script src="/static/jquery-1.4.4.min.js"></script>
           <script src="/static/jquery.editable.js"></script>
@@ -44,8 +45,8 @@ with Logging {
                 { if (isAdmin) <a href="/admin" class="login">Admin</a> }
               </xml:group>
               else <xml:group>
-                <a href={cgLoginURL} class="login">CG Log in</a>
-                <a href={loginURL} class="login">Google Log in</a>
+                <a href={cgLoginURL} class="login">Custom Log In</a>
+                <a href={loginURL} class="login">Google Log In</a>
               </xml:group>
             }
             <a href={startPage}>Overview</a>
@@ -424,7 +425,7 @@ with Logging {
 
   get("/admin") {
     val motd = KeyValueStore.readOrElse("motd", "")
-    page("Film Details", <xml:group>
+    page("Administration", <xml:group>
          <form action="/admin/motd" method="post">
            MOTD: <input type="text" name="motd" value={motd}/>
            <input type="submit" value="Set"/>
