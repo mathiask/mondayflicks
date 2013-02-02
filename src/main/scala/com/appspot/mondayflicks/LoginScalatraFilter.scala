@@ -41,10 +41,11 @@ with Style with Scripts with UserSupport with FlashMapSupport with Logging {
   }
 
   error {
-    severe(caughtThrowable)
-    page("Error",
-         <div class="error">Internal server error.</div>
-         <div><a href={startPage}>Restart</a></div>)
+    case e =>
+      severe(e)
+      page("Error",
+           <div class="error">Internal server error.</div>
+           <div><a href={startPage}>Restart</a></div>)
   }
 
   get("/login") {

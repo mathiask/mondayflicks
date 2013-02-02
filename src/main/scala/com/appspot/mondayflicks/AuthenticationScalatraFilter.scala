@@ -9,7 +9,7 @@ import com.google.appengine.api.appidentity.AppIdentityServiceFactory
  * I contain test functions for authentication.
  * The application runs also without this filter.
  */
-class AuthenticationScalatraFilter extends ScalatraFilter 
+class AuthenticationScalatraFilter extends ScalatraFilter
 with CalendarAccessSupport with TweeterSupport with UserSupport with Logging {
 
   get("/user/principal") {
@@ -21,7 +21,8 @@ with CalendarAccessSupport with TweeterSupport with UserSupport with Logging {
   }
 
   get("/admin/cal/test") {
-    AppIdentityServiceFactory.getAppIdentityService.getAccessToken(List("https://www.googleapis.com/auth/calendar")).getAccessToken
+    var token = AppIdentityServiceFactory.getAppIdentityService.getAccessToken(List("https://www.googleapis.com/auth/calendar"))
+    token.getAccessToken + " : " + token.getExpirationTime
   }
 
   get("/admin/cal/private") {
@@ -41,4 +42,3 @@ with CalendarAccessSupport with TweeterSupport with UserSupport with Logging {
   }
 
 }
-

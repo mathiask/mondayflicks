@@ -95,17 +95,15 @@ with Logging {
   private def filmURL(film: Film): String = baseURL + "/film/" + film.id
 
   error {
-    caughtThrowable match {
-      case _: javax.jdo.JDOObjectNotFoundException =>
-        page("Illegal Access",
-             <div class="error">The film or comment does not (or no longer) exists.</div>
-             <div><a href={startPage}>Restart</a></div>)
-      case t =>
-        severe(t)
-        page("Error",
-             <div class="error">Internal server error.</div>
-             <div><a href={startPage}>Restart</a></div>)
-    }
+    case _: javax.jdo.JDOObjectNotFoundException =>
+      page("Illegal Access",
+           <div class="error">The film or comment does not (or no longer) exists.</div>
+           <div><a href={startPage}>Restart</a></div>)
+    case e =>
+      severe(e)
+      page("Error",
+           <div class="error">Internal server error.</div>
+           <div><a href={startPage}>Restart</a></div>)
   }
 
   get("/") {
