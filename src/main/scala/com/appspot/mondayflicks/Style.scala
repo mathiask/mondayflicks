@@ -35,7 +35,8 @@ trait Style {
     |  left: -40px;
     |  color: #ff8c00;
     |  margin-top: 0px;
-    |  margin: 0px
+    |  margin: 0px;
+    |  display: inline;
     |}
     |h2 { color: #003980; }
     |h3 { margin: 0px; color: #3f5b7e; }
