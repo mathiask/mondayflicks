@@ -72,7 +72,7 @@ class Film extends NonEmailNickname {
     val now = Calendar getInstance
     val cal: Calendar = Calendar.getInstance()
     cal setTime (if (commentList isEmpty) created else commentList.last.created)
-    cal.add(Calendar.MINUTE, 5)
+    cal.add(Calendar.DATE, 1)
     (cal compareTo now) > 0
   }
 }
