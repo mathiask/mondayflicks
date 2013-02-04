@@ -5,7 +5,7 @@ import util.{DateOnly, NonEmailNickname}
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-import java.util.Date
+import java.util.{Date, Calendar}
 
 import javax.jdo.annotations._
 
@@ -62,6 +62,19 @@ class Film extends NonEmailNickname {
   def isPast = isScheduled && scheduled.isBeforeToday
 
   def isInCalendar = calendarId != null
+
+  /** Has this film not been scheduled, yet,
+   *  and has it been created or has a comment been added in the last 24 hours.
+   */
+  def isNew = ! isScheduled && recentlyChanged
+
+  private def recentlyChanged = {
+    val now = Calendar getInstance
+    val cal: Calendar = Calendar.getInstance()
+    cal setTime (if (commentList isEmpty) created else commentList.last.created)
+    cal.add(Calendar.MINUTE, 5)
+    (cal compareTo now) > 0
+  }
 }
 
 

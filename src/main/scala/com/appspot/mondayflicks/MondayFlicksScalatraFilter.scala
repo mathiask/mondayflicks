@@ -72,8 +72,8 @@ with Logging {
 
   private def motdScript = <xml:unparsed>
     <script>
-      $(function(){ $("#close_motd").click(function(){ 
-        $("#motd").fadeOut(); 
+      $(function(){ $("#close_motd").click(function(){
+        $("#motd").fadeOut();
         $.post("/motd/seen")
       }); });
     </script>
@@ -199,32 +199,40 @@ with Logging {
       </form>
     else <span/>
 
-  get("/user/doodle") { 
+  get("/user/doodle") {
     val films = FilmDatabase.allFilms filter {! _.isScheduled}
     page("Create Doodle",
          <form action="/user/doodle" method="POST">
-           { 
+           {
              for (film <- films) yield <div>
-               <input type="checkbox" name="film" value={film.id.toString} checked="checked"/> { film.title }
+               { checkbox("film", film.id.toString, FilmDatabase isNew film) }
+               { film.title }
              </div>
            }
            <input type="submit" class="flushleft" value="Create"/>
          </form>)
   }
 
+  private def checkbox(name: String, value: String, checked: Boolean) = {
+    if (checked)
+      <input type="checkbox" name={name} value={value} checked="checked"/>
+    else
+      <input type="checkbox" name={name} value={value}/>
+  }
+
   post("/user/doodle") {
-    val films = multiParams("film").map(FilmDatabase.getFilm _) 
+    val films = multiParams("film").map(FilmDatabase.getFilm _)
     redirect(if (films.isEmpty) startPage else doodleWizardUrl(films))
   }
 
-  private def doodleWizardUrl(films: Seq[Film]) = { 
+  private def doodleWizardUrl(films: Seq[Film]) = {
     "http://www.doodle.com/polls/wizard.html?" +
     "type=text" +
     "&levels=3" +
     "&title=Monday+Flicks+Film+Poll" +
     "&name=" + urlEncode(nonEmailNickname(currentUser)) +
     "&eMailAddress=" + currentUser.getNickname +
-    films.zipWithIndex.map{ case (f,i) => 
+    films.zipWithIndex.map{ case (f,i) =>
       "option" + (i+1) + "=" + urlEncode(f.title + " " + f.imdbLink)
     }.mkString("&", "&", "")
   }

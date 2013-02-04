@@ -15,8 +15,7 @@ Technology Stack
 * [jQuery](http://docs.jquery.com/Main_Page)
 * Google Calendar: currently broken
 * [Twitter](http://dev.twitter.com/doc) integration
-  * also using [google-api-java-client](http://code.google.com/p/google-api-java-client/)
-    with some extras
+  * using an older (alpha) version of [google-api-java-client](http://code.google.com/p/google-api-java-client/) with some extras
 
 FIXME
 -----
@@ -24,6 +23,3 @@ FIXME
 
 TODOs
 -----
-* Only tick "recently edited" films for Doodle creation
-* Deeper (OAuth) Doodle integration?
-* DIY Atom feeds
