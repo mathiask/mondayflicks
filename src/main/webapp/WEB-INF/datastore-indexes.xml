@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <datastore-indexes autoGenerate="true">
   <datastore-index kind="Film" ancestor="false" source="auto">
-    <property name="scheduledFor" direction="asc"/>
+    <property name="scheduledFor" direction="desc"/>
     <property name="created" direction="asc"/>
   </datastore-index>
   <datastore-index kind="FilmComment" ancestor="true" source="auto">
