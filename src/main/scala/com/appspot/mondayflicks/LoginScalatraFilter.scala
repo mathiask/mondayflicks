@@ -16,6 +16,7 @@ with Style with Scripts with UserSupport with FlashMapSupport with Logging {
           <title>{ title }</title>
           <script src="/static/jquery-1.4.4.min.js"></script>
           <style>{ style }</style>
+          <link href="//fonts.googleapis.com/css?family=Tangerine:700" type="text/css" rel="stylesheet" />
           <style>div.label{{ width: 6em; font-style: italic; display: inline-block; }}</style>
         </head>
         <body>
