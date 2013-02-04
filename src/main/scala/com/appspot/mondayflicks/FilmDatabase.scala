@@ -14,7 +14,7 @@ import com.google.appengine.api.users.User
 object FilmDatabase extends PersistenceManagerSupport[Film] {
 
   def allFilms: Seq[Film] =
-    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor, created").
+    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor desc, created").
                            execute.asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
 
   def addFilm(title: String, user: User) {

@@ -24,7 +24,6 @@ FIXME
 
 TODOs
 -----
-* Past films in reverse order
 * Only tick "recently edited" films for Doodle creation
 * Deeper (OAuth) Doodle integration?
 * DIY Atom feeds
