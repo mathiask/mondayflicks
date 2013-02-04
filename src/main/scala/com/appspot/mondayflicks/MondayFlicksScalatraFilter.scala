@@ -24,7 +24,7 @@ with Logging {
         <head>
           <title>{ title }</title>
           <style>{ style }</style>
-          <link href="http://fonts.googleapis.com/css?family=Tangerine:700" type="text/css" rel="stylesheet" />
+          <link href="//fonts.googleapis.com/css?family=Tangerine:700" type="text/css" rel="stylesheet" />
           <link rel="stylesheet" href="/static/jquery-ui-1.8.7.custom.css" type="text/css" media="all" />
           <script src="/static/jquery-1.4.4.min.js"></script>
           <script src="/static/jquery.editable.js"></script>
@@ -72,8 +72,8 @@ with Logging {
 
   private def motdScript = <xml:unparsed>
     <script>
-      $(function(){ $("#close_motd").click(function(){ 
-        $("#motd").fadeOut(); 
+      $(function(){ $("#close_motd").click(function(){
+        $("#motd").fadeOut();
         $.post("/motd/seen")
       }); });
     </script>
@@ -95,17 +95,15 @@ with Logging {
   private def filmURL(film: Film): String = baseURL + "/film/" + film.id
 
   error {
-    caughtThrowable match {
-      case _: javax.jdo.JDOObjectNotFoundException =>
-        page("Illegal Access",
-             <div class="error">The film or comment does not (or no longer) exists.</div>
-             <div><a href={startPage}>Restart</a></div>)
-      case t =>
-        severe(t)
-        page("Error",
-             <div class="error">Internal server error.</div>
-             <div><a href={startPage}>Restart</a></div>)
-    }
+    case _: javax.jdo.JDOObjectNotFoundException =>
+      page("Illegal Access",
+           <div class="error">The film or comment does not (or no longer) exists.</div>
+           <div><a href={startPage}>Restart</a></div>)
+    case e =>
+      severe(e)
+      page("Error",
+           <div class="error">Internal server error.</div>
+           <div><a href={startPage}>Restart</a></div>)
   }
 
   get("/") {
@@ -201,32 +199,40 @@ with Logging {
       </form>
     else <span/>
 
-  get("/user/doodle") { 
+  get("/user/doodle") {
     val films = FilmDatabase.allFilms filter {! _.isScheduled}
     page("Create Doodle",
          <form action="/user/doodle" method="POST">
-           { 
+           {
              for (film <- films) yield <div>
-               <input type="checkbox" name="film" value={film.id.toString} checked="checked"/> { film.title }
+               { checkbox("film", film.id.toString, FilmDatabase isNew film) }
+               { film.title }
              </div>
            }
            <input type="submit" class="flushleft" value="Create"/>
          </form>)
   }
 
+  private def checkbox(name: String, value: String, checked: Boolean) = {
+    if (checked)
+      <input type="checkbox" name={name} value={value} checked="checked"/>
+    else
+      <input type="checkbox" name={name} value={value}/>
+  }
+
   post("/user/doodle") {
-    val films = multiParams("film").map(FilmDatabase.getFilm _) 
+    val films = multiParams("film").map(FilmDatabase.getFilm _)
     redirect(if (films.isEmpty) startPage else doodleWizardUrl(films))
   }
 
-  private def doodleWizardUrl(films: Seq[Film]) = { 
+  private def doodleWizardUrl(films: Seq[Film]) = {
     "http://www.doodle.com/polls/wizard.html?" +
     "type=text" +
     "&levels=3" +
     "&title=Monday+Flicks+Film+Poll" +
     "&name=" + urlEncode(nonEmailNickname(currentUser)) +
     "&eMailAddress=" + currentUser.getNickname +
-    films.zipWithIndex.map{ case (f,i) => 
+    films.zipWithIndex.map{ case (f,i) =>
       "option" + (i+1) + "=" + urlEncode(f.title + " " + f.imdbLink)
     }.mkString("&", "&", "")
   }

@@ -13,11 +13,9 @@ Technology Stack
   * and a minimal trait wrapper around JDK logging
 * [Scalatra](https://github.com/scalatra/scalatra)
 * [jQuery](http://docs.jquery.com/Main_Page)
-* [Google Calendar](http://code.google.com/apis/calendar/data/2.0/developers_guide.html) integration
-  * using [google-api-java-client](http://code.google.com/p/google-api-java-client/)
+* Google Calendar: currently broken
 * [Twitter](http://dev.twitter.com/doc) integration
-  * also using [google-api-java-client](http://code.google.com/p/google-api-java-client/)
-    with some extras
+  * using an older (alpha) version of [google-api-java-client](http://code.google.com/p/google-api-java-client/) with some extras
 
 FIXME
 -----
@@ -25,6 +23,3 @@ FIXME
 
 TODOs
 -----
-* DIY Atom feeds
-* Move to current google-api-client
-* Deeper (OAuth) Doodle integration?

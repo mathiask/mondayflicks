@@ -14,7 +14,7 @@ import com.google.appengine.api.users.User
 object FilmDatabase extends PersistenceManagerSupport[Film] {
 
   def allFilms: Seq[Film] =
-    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor, created").
+    withPersistenceManager(pm => pm.newQuery("select from " + classOf[Film].getName + " order by scheduledFor desc, created").
                            execute.asInstanceOf[java.util.List[Film]].map(pm.detachCopy(_)))
 
   def addFilm(title: String, user: User) {
@@ -45,7 +45,7 @@ object FilmDatabase extends PersistenceManagerSupport[Film] {
   }
 
   def deleteComment(keyString: String, user: User, admin: Boolean) {
-    withPersistenceManager(pm => { 
+    withPersistenceManager(pm => {
       val comment = pm.getObjectById(classOf[FilmComment], KeyFactory.stringToKey(keyString)).asInstanceOf[FilmComment]
       if (admin || user == comment.user)
         pm.deletePersistent(comment)
@@ -53,7 +53,12 @@ object FilmDatabase extends PersistenceManagerSupport[Film] {
   }
 
   /** Get a film in transaction context. */
-  def withFilm(id: String)(callback: Film => Unit) =  
+  def withFilm(id: String)(callback: Film => Unit) =
     withPersistenceManager(pm => callback(doGetFilm(pm, id)))
 
+  def isNew(f: Film) = {
+    var b: Boolean = false
+    withFilm(f.id.toString){f => b = f.isNew}
+    b
+  }
 }
