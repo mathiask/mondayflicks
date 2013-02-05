@@ -21,5 +21,6 @@ FIXME
 -----
 * Calendar integration
 
-TODOs
------
+TODOs/Ideas
+-----------
+* Autocompletion when entering new films
