@@ -5,7 +5,6 @@ import util._
 import scala.xml._
 import org.scalatra._
 
-import java.net.URLEncoder
 import javax.servlet.FilterConfig
 
 import com.google.appengine.api.users.User
@@ -13,6 +12,7 @@ import com.google.appengine.api.users.User
 class MondayFlicksScalatraFilter extends ScalatraFilter
 with Style with Scripts with UserSupport with NonEmailNickname
 with CalendarAccessSupport with TweeterSupport
+with UrlHelper
 with Logging {
 
   private def page(title:String,
@@ -236,8 +236,6 @@ with Logging {
       "option" + (i+1) + "=" + urlEncode(f.title + " " + f.imdbLink)
     }.mkString("&", "&", "")
   }
-
-  private def urlEncode(string: String) = URLEncoder.encode(string, "UTF-8")
 
   post("/user/film") {
     val title = params('film)
