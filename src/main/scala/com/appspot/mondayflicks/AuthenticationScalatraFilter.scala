@@ -9,7 +9,6 @@ import org.scalatra._
 
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory
 
-import java.io.OutputStreamWriter
 import java.net.{URL, HttpURLConnection, URLEncoder}
 
 /**
@@ -69,48 +68,28 @@ with Logging  {
     "redirect_uri=" + fullUrlEncoded("/admin/token")
 
   get("/admin/token") {
-    val url = new URL("https://accounts.google.com/o/oauth2/token")
-    val connection = url.openConnection.asInstanceOf[HttpURLConnection]
-    connection setDoOutput true
-    connection setRequestMethod "POST"
-    connection.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-    val writer = new OutputStreamWriter(connection getOutputStream)
-    writer.write("code=" + urlEncode(params('code)) +
-                 "&client_id=" + urlEncode(session('ClientId).asInstanceOf[String]) +
-                 "&client_secret=" + urlEncode(session('ClientSecret).asInstanceOf[String]) +
-                 "&" + tokenRedirectParam +
-                 "&grant_type=authorization_code")
-    writer.close
-    if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
-      val s = new java.util.Scanner(connection getInputStream).useDelimiter("\\A")
-      if (s hasNext) {
-        session('AccessToken) = JSON.parseFull(s next).get.asInstanceOf[Map[String, String]]("access_token")
-        "Token received!"
-      }
-    } else
-      throw new RuntimeException(connection.getResponseCode.toString)
+    val json = postRequest("https://accounts.google.com/o/oauth2/token",
+                           None,
+                           "code=" + urlEncode(params('code)) +
+                             "&client_id=" + urlEncode(session('ClientId).asInstanceOf[String]) +
+                             "&client_secret=" + urlEncode(session('ClientSecret).asInstanceOf[String]) +
+                             "&" + tokenRedirectParam +
+                             "&grant_type=authorization_code",
+                           "application/x-www-form-urlencoded")
+    session('AccessToken) = JSON.parseFull(json).get.asInstanceOf[Map[String, String]]("access_token")
+    "Token received!"
   }
 
   get("/admin/cal/private") {
     if(!haveAccesToken)
       "No access token!"
     else {
-      val url = new URL("https://www.googleapis.com/calendar/v3/calendars/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com")
-      val connection = url.openConnection.asInstanceOf[HttpURLConnection]
-      connection setDoOutput true
-      connection setRequestMethod "GET"
-      connection.addRequestProperty("Authorization", "Bearer " + session('AccessToken));
-      if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
-        val s = new java.util.Scanner(connection getInputStream).useDelimiter("\\A")
-        if (s hasNext) {
-          s next
-        }
-      } else
-        throw new RuntimeException(connection.getResponseCode.toString)
+      getRequest("https://www.googleapis.com/calendar/v3/calendars/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com", accesToken)
     }
   }
 
   private def haveAccesToken = session.get('AccessToken).isDefined
+  private def accesToken = session('AccessToken).asInstanceOf[String]
 
   // get("/admin/cal/private/create/:title") {
   //   calendar.create(params('title))

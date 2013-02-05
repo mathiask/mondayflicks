@@ -20,6 +20,7 @@ Technology Stack
 FIXME
 -----
 * Calendar integration
+  * using OAuth2
 
 TODOs/Ideas
 -----------
