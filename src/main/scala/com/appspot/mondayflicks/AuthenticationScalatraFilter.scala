@@ -36,8 +36,8 @@ with Logging  {
     tweeter.tweet(params('status))
   }
 
-  get("/admin/url") {
-    request.getRequestURL
+  get("/admin/appid") {
+    AppIdentityServiceFactory.getAppIdentityService.getServiceAccountName
   }
 
   get("/admin/appidentitytoken") {
