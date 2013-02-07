@@ -37,7 +37,7 @@ trait UrlHelper extends UrlSupport with Logging {
       connection.addRequestProperty("Authorization", "Bearer " + t)
     debug("HTTP request:" + connection)
     f(connection)
-    if (connection.getResponseCode == HttpURLConnection.HTTP_OK || true) {
+    if (connection.getResponseCode == HttpURLConnection.HTTP_OK) {
       val s = new java.util.Scanner(connection getInputStream).useDelimiter("\\A")
       s next
     } else

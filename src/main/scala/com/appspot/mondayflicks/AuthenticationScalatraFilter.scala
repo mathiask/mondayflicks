@@ -1,15 +1,8 @@
 package com.appspot.mondayflicks
 
-import util._
-
 import scala.collection.JavaConversions._
-import scala.util.parsing.json.JSON
 
 import org.scalatra._
-
-import com.google.appengine.api.appidentity.AppIdentityServiceFactory
-
-import java.net.{URL, HttpURLConnection, URLEncoder}
 
 /**
  * I contain test functions for authentication.
@@ -17,8 +10,8 @@ import java.net.{URL, HttpURLConnection, URLEncoder}
  */
 class AuthenticationScalatraFilter extends ScalatraFilter
 with CalendarAccessSupport with TweeterSupport with UserSupport
-with UrlHelper
-with Logging  {
+with util.UrlHelper
+with util.Logging  {
 
   get("/user/principal") {
     val user = currentUser
@@ -36,15 +29,12 @@ with Logging  {
     tweeter.tweet(params('status))
   }
 
-  get("/admin/appid") {
-    AppIdentityServiceFactory.getAppIdentityService.getServiceAccountName
-  }
-
-  get("/admin/appidentitytoken") {
-    var token = AppIdentityServiceFactory.getAppIdentityService.getAccessToken(List("https://www.googleapis.com/auth/calendar"))
-    session('AccessToken) = token.getAccessToken
-    token.getAccessToken + " : " + token.getExpirationTime
-  }
+  // doesn't work for Google Calendar
+  // get("/admin/appidentitytoken") {
+  //   var token = AppIdentityServiceFactory.getAppIdentityService.getAccessToken(List("https://www.googleapis.com/auth/calendar"))
+  //   session('AccessToken) = token.getAccessToken
+  //   token.getAccessToken + " : " + token.getExpirationTime
+  // }
 
   get("/admin/oauth2") {
     <form action="/admin/oauth2" method="POST">
@@ -56,40 +46,25 @@ with Logging  {
   }
 
   post("/admin/oauth2") {
-    session('ClientId) = params('cid)
-    session('ClientSecret) = params('csec)
-    redirect("https://accounts.google.com/o/oauth2/auth?" +
-             "response_type=code&client_id=" + params('cid) +
-             "&" + tokenRedirectParam +
-             "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar")
+    setClientIdAndSecret(params('cid), params('csec))
+    redirect(oauth2url(tokenPath))
   }
 
-  private def tokenRedirectParam =
-    "redirect_uri=" + fullUrlEncoded("/admin/token")
+  private val tokenPath = "/admin/token"
 
-  get("/admin/token") {
-    val json = postRequest("https://accounts.google.com/o/oauth2/token",
-                           None,
-                           "code=" + urlEncode(params('code)) +
-                             "&client_id=" + urlEncode(session('ClientId).asInstanceOf[String]) +
-                             "&client_secret=" + urlEncode(session('ClientSecret).asInstanceOf[String]) +
-                             "&" + tokenRedirectParam +
-                             "&grant_type=authorization_code",
-                           "application/x-www-form-urlencoded")
-    session('AccessToken) = JSON.parseFull(json).get.asInstanceOf[Map[String, String]]("access_token")
+  get(tokenPath) {
+    exchangeCodeForToken(params('code), tokenPath)
     "Token received!"
   }
 
   get("/admin/cal/private") {
-    if(!haveAccesToken)
+    if(!calendar.hasToken)
       "No access token!"
     else {
-      getRequest("https://www.googleapis.com/calendar/v3/calendars/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com", accesToken)
+      getRequest("https://www.googleapis.com/calendar/v3/calendars/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com",
+                 calendar.token.get)
     }
   }
-
-  private def haveAccesToken = session.get('AccessToken).isDefined
-  private def accesToken = session('AccessToken).asInstanceOf[String]
 
   // get("/admin/cal/private/create/:title") {
   //   calendar.create(params('title))
