@@ -381,7 +381,7 @@ with Logging {
   post("/user/film/:id/rename") {
     FilmDatabase.withFilm(params('id)) { film =>
       film.title = params('title)
-      if (film.isInCalendar) calendar.rename(film)
+      if (film.isInCalendar) calendar.update(film)
       tweet("Film " + filmURL(film) + " renamed to " + film.title)
     }
   }
@@ -422,9 +422,10 @@ with Logging {
 
   private def schedule(film: Film, date: DateOnly) {
     film.scheduled = date
-    if (film.isInCalendar) {
-      calendar.reschedule(film)
-    } else film.calendarId = calendar.create(film)
+    if (film.isInCalendar)
+      calendar.update(film)
+    else
+      film.calendarId = calendar.create(film)
   }
 
   get("/admin") {

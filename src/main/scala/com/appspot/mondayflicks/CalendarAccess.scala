@@ -2,33 +2,42 @@ package com.appspot.mondayflicks
 
 import util.Logging
 import scala.collection.JavaConversions._
+import scala.util.parsing.json._
 
 import com.google.api.client.util.{Key, DateTime}
-import com.google.api.client.googleapis.json.JsonCContent
-import com.google.api.client.googleapis.GoogleUrl
 
 trait CalendarAccess {
   def token: Option[String]
   def hasToken = token.isDefined
   def create(film: Film): String
-  def create(title: String): String
   def delete(id: String): Unit
-  def reschedule(film: Film): Unit
-  def rename(film: Film): Unit
+  def update(film: Film): Unit
 }
 
 class DummyCalendarAccess extends CalendarAccess with Logging {
   def token: Option[String] = None
   def create(film: Film) = { info("Dummy create calendar for " + film); "dummy" }
-  def create(title: String) = { info("Dummy create calendar for " + title); "dummy" }
   def delete(id: String) = info("Dummy calendar deleting " + id)
-  def reschedule(film: Film) = info("Dummy rescheduling " + film)
-  def rename(film: Film) = info("Dummy renaming " + film)
+  def update(film: Film) = info("Dummy syncinging " + film)
 }
 
 // FIXME extend CalendarAccess
 class GoogleCalendarAccess(_token: String) extends DummyCalendarAccess with Logging {
   override def token = Some(_token)
+
+  override def create(film: Film) = try {
+    debug("Creating film...")
+    val j = JSONObject(Map("summary" -> "test", "start" -> JSONObject(Map("date" -> new java.util.Date))))
+    // val content = new JsonCContent
+    // content.data = Event(film.title, film.scheduled)
+    // val event = postFollowingRedirect(url, content).parseAs(classOf[Event])
+    // debug("... with id " + event.id)
+    // event.id
+    "42"
+  } catch { // don't fail because of calendar
+    case e => severe(e); null
+  }
+
 }
 
 // class GoogleCalendarAccess(token: String, secret: String) extends OAuthRestResource(token, secret)

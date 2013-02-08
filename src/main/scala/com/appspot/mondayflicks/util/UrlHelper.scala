@@ -26,7 +26,7 @@ trait UrlHelper extends UrlSupport with Logging {
   protected def getRequest(url: String, token: String): String =
     request(url, "GET", Some(token)){ _ => () }
 
-  private def request(url: String,
+  protected def request(url: String,
                   method: String,
                   token: Option[String])(f: HttpURLConnection => Unit): String = {
     val u = new URL(url)

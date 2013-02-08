@@ -1,8 +1,9 @@
 package com.appspot.mondayflicks
 
 import scala.collection.JavaConversions._
-
 import org.scalatra._
+import util.DateOnly
+
 
 /**
  * I contain test functions for authentication.
@@ -29,7 +30,8 @@ with util.Logging  {
     tweeter.tweet(params('status))
   }
 
-  // doesn't work for Google Calendar
+  // Doesn't work for Google Calendar
+  //
   // get("/admin/appidentitytoken") {
   //   var token = AppIdentityServiceFactory.getAppIdentityService.getAccessToken(List("https://www.googleapis.com/auth/calendar"))
   //   session('AccessToken) = token.getAccessToken
@@ -66,8 +68,11 @@ with util.Logging  {
     }
   }
 
-  // get("/admin/cal/private/create/:title") {
-  //   calendar.create(params('title))
-  // }
+  get("/admin/cal/private/create/:title") {
+    var film = new Film
+    film.title = params('title)
+    film.scheduled = DateOnly.today
+    calendar.create(film)
+  }
 
 }
