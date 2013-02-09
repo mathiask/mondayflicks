@@ -16,9 +16,16 @@ with util.Logging {
   private var clientId: String = _
   private var clientSecret: String = _
 
-  override abstract def initialize(config: FilterConfig) {
+  override abstract def initialize(config: FilterConfig): Unit = {
     super.initialize(config)
     calendar = new DummyCalendarAccess
+    val context = config.getServletContext
+    clientId = context getInitParameter "calendar-client-id"
+    clientSecret = context getInitParameter "calendar-client-secret"
+    if (clientId == null || clientSecret == null || clientSecret == "SECRET")
+      warn("No valid Google Calendar configuration, you can only use the dummy implementation")
+    else
+      info("Calendar configured for client id " + clientId)
   }
 
   protected def setClientIdAndSecret(id: String, secret: String) {
@@ -44,18 +51,4 @@ with util.Logging {
     calendar =
       new GoogleCalendarAccess(JSON.parseFull(json).get.asInstanceOf[Map[String, String]]("access_token"))
   }
-
-
-  // override abstract def initialize(config: FilterConfig): Unit = {
-  //   super.initialize(config)
-  //   val context = config.getServletContext
-  //   val calendarToken = context getInitParameter "calendar-token"
-  //   calendar = if (calendarToken != null)
-  //     new GoogleCalendarAccess(calendarToken, context getInitParameter "calendar-token-secret")
-  //     else {
-  //       warn("No calendar-token: configuring dummy implementation")
-  //       new DummyCalendarAccess
-  //     }
-  // }
-
 }

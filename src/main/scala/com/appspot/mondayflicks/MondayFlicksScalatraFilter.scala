@@ -431,13 +431,30 @@ with Logging {
   get("/admin") {
     val motd = KeyValueStore.readOrElse("motd", "")
     page("Administration", <xml:group>
+         <div>Calendar backend: { calendar match {
+           case _: DummyCalendarAccess => "dummy"
+           case _ => "Google"}}</div>
+         <div><a href="/admin/calendar">Connect to Google Calendar</a></div>
          <form action="/admin/motd" method="post">
-           MOTD: <input type="text" name="motd" value={motd}/>
-           <input type="submit" value="Set"/>
+           <p>
+             MOTD: <input type="text" name="motd" value={motd}/>
+             <input type="submit" value="Set"/>
+           </p>
          </form>
-         <div><a href="/login/admin/users">User administration</a></div>
-         <div><a href="/admin/cache/stats">Memcache statistics</a></div>
+         <p><a href="/login/admin/users">User administration</a></p>
+         <p><a href="/admin/cache/stats">Memcache statistics</a></p>
       </xml:group>)
+  }
+
+  get("/admin/calendar") {
+    redirect(oauth2url(calendarTokenPath))
+  }
+
+  private val calendarTokenPath = "/admin/calendar/token"
+
+  get(calendarTokenPath) {
+    exchangeCodeForToken(params('code), calendarTokenPath)
+    redirect("/admin")
   }
 
   post("/admin/motd") {
@@ -454,5 +471,4 @@ with Logging {
            <tr><th>Idle seconds</th><td>{stats.getMaxTimeWithoutAccess}</td></tr>
          </table>)
   }
-
 }

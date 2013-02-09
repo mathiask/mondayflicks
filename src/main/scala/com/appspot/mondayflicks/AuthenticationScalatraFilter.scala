@@ -52,6 +52,10 @@ with util.Logging  {
     redirect(oauth2url(tokenPath))
   }
 
+  get("/admin/oauth2!") {
+    redirect(oauth2url(tokenPath))
+  }
+
   private val tokenPath = "/admin/token"
 
   get(tokenPath) {

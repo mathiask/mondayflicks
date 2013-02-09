@@ -13,14 +13,11 @@ Technology Stack
   * and a minimal trait wrapper around JDK logging
 * [Scalatra](https://github.com/scalatra/scalatra)
 * [jQuery](http://docs.jquery.com/Main_Page)
-* Google Calendar: currently broken
+* [Google Calendar](https://developers.google.com/google-apps/calendar/) integration
+  * using [OAuth 2.0](http://oauth.net/2/) with built in Scala classes
 * [Twitter](http://dev.twitter.com/doc) integration
-  * using an older (alpha) version of [google-api-java-client](http://code.google.com/p/google-api-java-client/) with some extras
-
-FIXME
------
-* Calendar integration
-  * using OAuth2
+  * using [OAuth](http://tools.ietf.org/html/rfc5849)
+  * with an older (alpha) version of [google-api-java-client](http://code.google.com/p/google-api-java-client/) with some extras
 
 TODOs/Ideas
 -----------
