@@ -434,7 +434,7 @@ with Logging {
          <div>Calendar backend: { calendar match {
            case _: DummyCalendarAccess => "dummy"
            case _ => "Google"}}</div>
-         <div><a href="/admin/calendar">Connect to Google Calendar</a></div>
+         <div><a href="/login/admin/calendar">Connect to Google Calendar</a></div>
          <form action="/admin/motd" method="post">
            <p>
              MOTD: <input type="text" name="motd" value={motd}/>
@@ -446,7 +446,7 @@ with Logging {
       </xml:group>)
   }
 
-  get("/admin/calendar") {
+  get("/login/admin/calendar") {
     redirect(oauth2url(calendarTokenPath))
   }
 
