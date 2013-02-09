@@ -450,7 +450,7 @@ with Logging {
     redirect(oauth2url(calendarTokenPath))
   }
 
-  private val calendarTokenPath = "/admin/calendar/token"
+  private val calendarTokenPath = "/login/admin/calendar/token"
 
   get(calendarTokenPath) {
     exchangeCodeForToken(params('code), calendarTokenPath)
