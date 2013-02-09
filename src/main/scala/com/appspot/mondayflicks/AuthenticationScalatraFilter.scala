@@ -11,7 +11,7 @@ import util.DateOnly
  */
 class AuthenticationScalatraFilter extends ScalatraFilter
 with CalendarAccessSupport with TweeterSupport with UserSupport
-with util.UrlHelper
+with util.UrlHelper with util.HttpHelper
 with util.Logging  {
 
   get("/user/principal") {
@@ -59,20 +59,25 @@ with util.Logging  {
     "Token received!"
   }
 
-  get("/admin/cal/private") {
-    if(!calendar.hasToken)
-      "No access token!"
-    else {
-      getRequest("https://www.googleapis.com/calendar/v3/calendars/pvbp2e5h4t4mhigof30lkq5abc%40group.calendar.google.com",
-                 calendar.token.get)
-    }
-  }
-
   get("/admin/cal/private/create/:title") {
     var film = new Film
     film.title = params('title)
     film.scheduled = DateOnly.today
     calendar.create(film)
+  }
+
+  get("/admin/cal/private/delete/:id") {
+    calendar.delete(params('id))
+    "Deleted."
+  }
+
+  get("/admin/cal/private/update/:id/:title/:date") {
+    var film = new Film
+    film.calendarId = params('id)
+    film.title = params('title)
+    film.scheduled = DateOnly(params('date))
+    calendar.update(film)
+    "Updated."
   }
 
 }

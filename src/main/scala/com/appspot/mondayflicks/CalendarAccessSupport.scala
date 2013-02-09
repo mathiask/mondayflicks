@@ -6,7 +6,8 @@ import scala.util.parsing.json.JSON
 
 import org.scalatra._
 
-trait CalendarAccessSupport extends Initializable with util.UrlHelper
+trait CalendarAccessSupport extends Initializable
+with util.UrlHelper with util.HttpHelper
 with util.Logging {
 
   override type Config = FilterConfig
