@@ -7,6 +7,15 @@
   <display-name>Monday Flicks</display-name>
 
   <context-param>
+    <param-name>calendar-client-id</param-name>
+    <param-value>486561196605-qq8p104kvhpk8c9898ivjithk332qtma.apps.googleusercontent.com</param-value>
+  </context-param>
+  <context-param>
+    <param-name>calendar-client-secret</param-name>
+    <param-value>SECRET</param-value>
+  </context-param>
+
+  <context-param>
     <param-name>twitter-consumer-key</param-name>
     <param-value>VyP9BfSuvsaGgqb5XYQoQ</param-value>
   </context-param>
