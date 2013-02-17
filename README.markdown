@@ -21,4 +21,3 @@ Technology Stack
 
 TODOs/Ideas
 -----------
-* Autocompletion when entering new films
