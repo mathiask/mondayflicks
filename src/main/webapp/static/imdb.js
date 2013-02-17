@@ -1,3 +1,4 @@
+var mondayflicks = mondayflicks || {};
 mondayflicks.topfilms=[
 "(500) Days of Summer",
 "10 Things I Hate About You",

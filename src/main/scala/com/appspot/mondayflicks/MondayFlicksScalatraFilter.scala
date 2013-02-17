@@ -29,7 +29,7 @@ with Logging {
           <script src="/static/jquery-1.4.4.min.js"></script>
           <script src="/static/jquery.editable.js"></script>
           { for (script <- scripts) yield <script src={ "/static/" + script }></script> }
-          <script>if (typeof mondayflick === 'undefined') mondayflicks = {{}}</script>
+          <script>if (typeof mondayflicks === 'undefined') mondayflicks = {{}}</script>
         </head>
         <body>
           <div id="main">
@@ -122,7 +122,8 @@ with Logging {
              filmList(<h2>Proposed Films</h2>, proposedFilms),
              if (proposedFilms.nonEmpty && isLoggedIn) doodleButton else <!-- nothing to doodle -->,
              newFilmForm),
-         sidebar = Some(defaultPageSidebar))
+         sidebar = Some(defaultPageSidebar),
+         scripts = List("imdb.js", "jquery-ui-1.8.18.custom.min.js"))
   }
 
   private def defaultPageSidebar = {
@@ -196,8 +197,16 @@ with Logging {
         <input id="film" type="text" name="film"/>
         <input id="new" type="submit" value="New"/>
         { onClickNonBlankScript("#new", "#film") }
+        { filmAutocompleteScript("#film") }
       </form>
     else <span/>
+
+  private def filmAutocompleteScript(selector: String) =
+    <script>
+      $(function(){{
+        $('{selector}').autocomplete({{source: mondayflicks.topfilms, minLength: 3, autoFocus: true }});
+      }});
+    </script>
 
   get("/user/doodle") {
     val films = FilmDatabase.allFilms filter {! _.isScheduled}
@@ -258,7 +267,7 @@ with Logging {
              comments(id, film.comments),
              addCommentForm(id)),
          sidebar = Some(defaultPageSidebar),
-         scripts = List("jquery-ui-1.8.7.custom.min.js"))
+         scripts = List("jquery-ui-1.8.18.custom.min.js"))
   }
 
   private def filmTitle(title: String) =
