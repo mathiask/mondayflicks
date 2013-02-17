@@ -204,7 +204,10 @@ with Logging {
   private def filmAutocompleteScript(selector: String) =
     <script>
       $(function(){{
-        $('{selector}').autocomplete({{source: mondayflicks.topfilms, minLength: 3, autoFocus: true }});
+        $('{selector}').autocomplete({{source: mondayflicks.topfilms,
+                                       minLength: 4,
+                                       position: {{my: 'left top', at: 'right top', offset: '-5 -20'}},
+                                       autoFocus: true }});
       }});
     </script>
 
